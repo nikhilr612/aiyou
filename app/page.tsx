@@ -1,100 +1,104 @@
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ModeToggle } from "@/components/ui/modetoggle";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen flex flex-col items-center justify-between p-6 space-y-6">
+      {/* Header Section */}
+      <header className="w-full max-w-7xl flex items-center justify-between space-x-6 py-4 max-h-16"> {/* Added max-h-16 */}
+        <div className="flex items-center space-x-4">
+          {/* Logo Image */}
+          <div className="bg-black text-white p-1 rounded">
+            <Image src="/images/logo.png" alt="Aiyou Logo" width={40} height={40} />
+          </div>
+          <h1 className="text-lg font-semibold">Aiyou</h1>
         </div>
+        <div className="flex items-center space-x-4">
+          <Link href="/host">Host</Link>
+          <Button variant="default">Get Started</Button>
+          <ModeToggle />
+        </div>
+      </header>
+
+      <hr className="w-full max-w-7xl" />
+
+      {/* Main Content */}
+      <main className="flex flex-col md:flex-row w-full max-w-7xl space-y-6 md:space-y-0 md:space-x-6">
+        {/* Left Side - Large Image */}
+        <Card className="flex-1 h-64 bg-gray-200 relative">
+          <Image src="/images/image1.jpg" alt="Large Image" layout="fill" objectFit="cover" />
+        </Card>
+
+        {/* Right Side - Text and Buttons */}
+        <Card className="flex-1 space-y-4">
+          <CardHeader>
+            <CardTitle>Aiyou</CardTitle>
+            <p className="font-semibold">
+              Agentic Retrieval Augmented Generation.<br />
+              Personalized.<br />
+              Open Source.<br />
+              Local.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button variant="default" asChild>
+              <Link href="/get-started">Get Started</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <hr className="w-full max-w-7xl" />
+
+      {/* About and Getting Started Section */}
+      <section className="flex flex-col md:flex-row w-full max-w-7xl space-y-6 md:space-y-0 md:space-x-6">
+        {/* About Section */}
+        <Card className="flex-1 p-4">
+          <CardHeader>
+            <CardTitle>About</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Aiyou is a local agentic service leveraging RAG (Retrieve and Generate) technology to
+              provide efficient information retrieval. Our platform processes user queries and
+              generates contextually relevant responses, drawing on a variety of local data sources.
+            </p>
+            <p className="mt-4">
+              Designed for practicality, Aiyou aims to facilitate access to information and insights
+              tailored to individual and community needs.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Getting Started Image */}
+        <Card className="flex-1 h-64 bg-gray-200 relative">
+          <Image src="/images/image2.jpg" alt="Getting Started Image" layout="fill" objectFit="cover" />
+        </Card>
+      </section>
+
+      <hr className="w-full max-w-7xl" />
+
+      {/* Footer */}
+      <footer className="w-full max-w-7xl flex justify-between items-center text-sm text-gray-500 mt-6">
+        <p>
+          © 2024 Aiyou. All Rights Reserved. Empowering language models.
+          <br />
+          Contact: openinbox@mailinator.com
+        </p>
+        <div className="flex space-x-4">
+          <Link href="/terms">
+            Terms of Service
+          </Link>
+          <Link href="/privacy">
+            Privacy Policy
+          </Link>
+          <Link href="https://github.com">
+            Github
+          </Link>
+        </div>
       </footer>
     </div>
   );
