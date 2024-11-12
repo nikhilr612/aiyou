@@ -18,11 +18,28 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"; // Added Tooltip components
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; // Added Dropdown Menu component
-import { Plus, Send } from "lucide-react"; // Importing Lucide Icons
+import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react"; // Importing Lucide Icons
 import { Textarea } from "@/components/ui/textarea"; // Import ShadCN's Textarea
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Message, Endpoint, llmcall } from "@/lib/llmcall";
+import Markdown from "react-markdown";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+
+import  atomDark  from "react-syntax-highlighter/dist/esm/styles/prism/atom-dark";
 
 interface Thread {
   id: number;
@@ -50,6 +67,8 @@ export default function MainPage() {
   const [search, setSearch] = useState("");
   const [endpoints, setEndpoints] = useState<Endpoint[]>(initialEndpoints);
   const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(endpoints[0]);
+  
+  // For sShowing toasts.
   const { toast } = useToast();
 
   const handleSendMessage = async (text: string) => {
@@ -185,37 +204,42 @@ interface EndpointSelectProps {
 }
 
 function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint }: EndpointSelectProps) {
-  const [newEndpointName, setNewEndpointName] = useState("");
-  const [newEndpointUrl, setNewEndpointUrl] = useState("");
-
-  const handleAddEndpoint = () => {
-    if (newEndpointName.trim() && newEndpointUrl.trim()) {
-      const newEndpoint = { name: newEndpointName, target: newEndpointUrl };
-      setSelectedEndpoint(newEndpoint);
-      setNewEndpointName("");
-      setNewEndpointUrl("");
-    }
-  };
+  const [open, setOpen] = useState(false)
 
   return (
-    <div>
-      <select
-        id="endpoint-select"
-        value={selectedEndpoint.target}
-        onChange={(e) => {
-          const endpoint = endpoints.find(ep => ep.target === e.target.value);
-          if (endpoint) setSelectedEndpoint(endpoint);
-        }}
-        className="w-full p-2 border rounded"
-      >
-        {endpoints.map((endpoint) => (
-          <option key={endpoint.target} value={endpoint.target}>
-            {endpoint.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button role="combobox" aria-expanded={open}>
+          {selectedEndpoint.name || "Select endpoint..."}
+          <ChevronsUpDown />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <Command>
+          <CommandInput placeholder="Search endpoint..." />
+          <CommandList>
+            <CommandEmpty>No endpoint found.</CommandEmpty>
+            <CommandGroup>
+              {endpoints.map((endpoint) => (
+                <CommandItem
+                  key={endpoint.target}
+                  value={endpoint.target}
+                  onSelect={(currentValue: string) => {
+                    const endpoint = endpoints.find(ep => ep.target === currentValue)
+                    if (endpoint) setSelectedEndpoint(endpoint)
+                    setOpen(false)
+                  }}
+                >
+                  {endpoint.name}
+                  <Check className={selectedEndpoint.target === endpoint.target ? "visible" : "invisible"} />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
 }
 
 interface NewEndpointDialogProps {
@@ -288,7 +312,7 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
             <Button variant="ghost" className="text-lg">⋮</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>Ingest</DropdownMenuItem>
             <DropdownMenuItem>Help</DropdownMenuItem>
             <NewEndpointDialog addEndpoint={addEndpoint} />
           </DropdownMenuContent>
@@ -319,7 +343,7 @@ function ChatPanel({ messages }: ChatPanelProps) {
                   <AvatarImage src={ message.isUser ? USER_AVATAR_PLACEHOLDER : THREAD_IMAGE_PLACEHOLDER } alt={ message.content } />
                   <AvatarFallback>{ message.isUser ? "U" : "R" }</AvatarFallback>
                 </Avatar>
-                <span>{message.content}</span>
+                <MarkdownRenderer content={message.content}/>
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -331,6 +355,66 @@ function ChatPanel({ messages }: ChatPanelProps) {
     </ScrollArea>
   );
 }
+
+interface CodeBlockProps {
+  code: string
+  language: string
+}
+
+export function CodeBlock({ code, language }: CodeBlockProps) {
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+  };
+
+  return (
+    <div style={{position: "relative"}}>
+      <Button onClick={handleCopy} variant="outline" style = {{position: "absolute", top: "10px", right: "10px"}} >
+        <Copy/> 
+      </Button>
+      <SyntaxHighlighter
+        language={language}
+        style={atomDark}
+        showLineNumbers
+        PreTag="div"
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  )
+}
+
+interface MarkdownRendererProps {
+  content: string
+}
+
+export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  return (
+    <Markdown
+      className="display-block"
+      components={{
+        code(props) {
+          const { children, className, ...rest } = props
+          const match = /language-(\w+)/.exec(className || '')
+          return match ? (
+            <CodeBlock
+              {...rest}
+              language={match[1]}
+              code={String(children).replace(/\n$/, '')}
+            />
+          ) : (
+            <code {...rest} className={className}>
+              {children}
+            </code>
+          )
+        }
+      }}
+    >
+      {content}
+    </Markdown>
+  )
+}
+
+
 
 // Input Area Component
 interface InputAreaProps {
