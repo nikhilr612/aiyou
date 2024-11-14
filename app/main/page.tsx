@@ -1,28 +1,28 @@
-"use client"; // Marks this entire file as a client component
+"use client"; 
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ModeToggle } from "@/components/ui/modetoggle"; // Import your ModeToggle component
+import { ModeToggle } from "@/components/ui/modetoggle";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar"; // Updated Avatar component
+} from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"; // Added Tooltip components
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; // Added Dropdown Menu component
-import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react"; // Importing Lucide Icons
-import { Textarea } from "@/components/ui/textarea"; // Import ShadCN's Textarea
+} from "@/components/ui/tooltip"; 
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; 
+import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react"; 
+import { Textarea } from "@/components/ui/textarea"; 
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Message, Endpoint, llmcall } from "@/lib/llmcall";
+import { Message, Endpoint, agentic_call } from "@/lib/llmcall";
 import Markdown from "react-markdown";
 import {
   Command,
@@ -38,8 +38,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import Link from "next/link";
 
-import  atomDark  from "react-syntax-highlighter/dist/esm/styles/prism/atom-dark";
+import  materialDark  from "react-syntax-highlighter/dist/esm/styles/prism/material-dark";
 
 interface Thread {
   id: number;
@@ -50,26 +51,55 @@ const THREAD_IMAGE_PLACEHOLDER: string = "/images/bot-avatar.png";
 const USER_AVATAR_PLACEHOLDER: string = "/images/user-avatar.png";
 
 const initialEndpoints: Endpoint[] = [
-  { name: "Dummy Endpoint", target: "https://api.endpoint1.com" },
+  { name: "ollama-local", target: "http://localhost:11434" },
 ];
 
 export default function MainPage() {
-  const [threads, setThreads] = useState<Thread[]>([
-    { id: 1, name: "Thread 1" },
-    { id: 2, name: "Thread 2" },
-  ]);
+  const [threads, setThreads] = useState<Thread[]>([{ id: 1, name: "Thread" }]);
+
   const [currentThread, setCurrentThread] = useState<Thread>(threads[0]);
+
   type ThreadMap = { [key: number]: Message[] };
+
   const [messages, setMessages] = useState<ThreadMap>({
     1: [],
     2: [],
   });
+
   const [search, setSearch] = useState("");
+
   const [endpoints, setEndpoints] = useState<Endpoint[]>(initialEndpoints);
-  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(endpoints[0]);
+
+  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(initialEndpoints[0]);
   
   // For sShowing toasts.
   const { toast } = useToast();
+
+  useEffect(() => {
+    const storedThreads = localStorage.getItem('AIYOU_threads');
+    setThreads(storedThreads ? JSON.parse(storedThreads) : [{ id: 1, name: "Thread" }]);
+
+    const storedMessages = localStorage.getItem('AIYOU_messages');
+    setMessages(storedMessages ? JSON.parse(storedMessages) : {
+      1: [],
+      2: [],
+    });
+
+    const storedCurrentThread = localStorage.getItem('AIYOU_currentThread');
+    setCurrentThread(storedCurrentThread ? JSON.parse(storedCurrentThread) : threads[0]);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('AIYOU_threads', JSON.stringify(threads));
+  }, [threads]);
+
+  useEffect(() => {
+    localStorage.setItem('AIYOU_currentThread', JSON.stringify(currentThread));
+  }, [currentThread]);
+
+  useEffect(() => {
+    localStorage.setItem('AIYOU_messages', JSON.stringify(messages));
+  }, [messages]);
 
   const handleSendMessage = async (text: string) => {
     const newMessage: Message = { content: text, isUser: true };
@@ -79,7 +109,7 @@ export default function MainPage() {
     });
 
     try {
-      const response = await llmcall(selectedEndpoint, messages[currentThread.id], text, "user");
+      const response = await agentic_call(selectedEndpoint, messages[currentThread.id], text);
       const response_message: Message = { content: response, isUser: false };
       if (response.trim().length > 0) {
         setMessages(msgs => {
@@ -296,6 +326,26 @@ interface TopBarProps {
   addEndpoint: (endpoint: Endpoint) => void;
 }
 
+
+interface IngestItemProps {
+    onFileIngested: (file: File) => Promise<void>;
+}
+
+function IngestItem({ onFileIngested } : IngestItemProps) {
+
+    const handleClick = () => {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt'; // Only allow text files 
+      input.onchange = async (event) => {
+          const file = (event.target as HTMLInputElement).files?.[0] || null; 
+          if (file) await onFileIngested(file);
+      };
+      input.click();
+    };
+
+    return (<DropdownMenuItem onClick={handleClick}>Ingest</DropdownMenuItem>);
+};
+
+
 function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint }: TopBarProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
@@ -312,8 +362,10 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
             <Button variant="ghost" className="text-lg">⋮</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Ingest</DropdownMenuItem>
-            <DropdownMenuItem>Help</DropdownMenuItem>
+            <IngestItem onFileIngested={ async (f) => { 
+              console.log(await f.text());
+            } }/>
+            <DropdownMenuItem><Link href="/help">Help</Link></DropdownMenuItem>
             <NewEndpointDialog addEndpoint={addEndpoint} />
           </DropdownMenuContent>
         </DropdownMenu>
@@ -368,17 +420,17 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
 
   return (
     <div style={{position: "relative"}}>
-      <Button onClick={handleCopy} variant="outline" style = {{position: "absolute", top: "10px", right: "10px"}} >
-        <Copy/> 
-      </Button>
       <SyntaxHighlighter
         language={language}
-        style={atomDark}
+        style={materialDark}
         showLineNumbers
         PreTag="div"
       >
         {code}
       </SyntaxHighlighter>
+      <Button onClick={handleCopy} variant="outline" style = {{position: "absolute", top: "10px", right: "10px"}} >
+        <Copy/> Copy
+      </Button>
     </div>
   )
 }
@@ -413,7 +465,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     </Markdown>
   )
 }
-
 
 
 // Input Area Component
