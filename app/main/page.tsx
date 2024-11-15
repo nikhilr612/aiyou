@@ -194,37 +194,36 @@ function SidePanel({ threads, onSelectThread, onNewThread, search, setSearch }: 
   );
 
   return (
-    <aside className="w-64 p-4 border-r hidden lg:block h-full">
-      <div className="flex items-center mb-4">
-        <Input
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full"
-        />
-        <Button onClick={onNewThread} className="ml-2" variant="outline">
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-      <ScrollArea className="h-full space-y-2">
-        {filteredThreads.map((thread) => (
-          <Card
-            key={thread.id}
-            onClick={() => onSelectThread(thread)}
-            className="cursor-pointer p-2 rounded"
-          >
-            <CardContent className="flex items-center space-x-3">
-              <Avatar>
-                <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
-                <AvatarFallback>{thread.name[0]}</AvatarFallback>
-              </Avatar>
-              <span>{thread.name}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </ScrollArea>
-    </aside>
-  );
+  <aside className="w-64 p-4 border-r hidden lg:block h-full">
+    <div className="flex items-center mb-4">
+      <Input
+        placeholder="Search or add"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full"
+      />
+      <Button onClick={onNewThread} className="ml-2" variant="outline">
+        <Plus className="w-4 h-4" />
+      </Button>
+    </div>
+    <ScrollArea className="h-full space-y-2">
+      {filteredThreads.map((thread) => (
+        <Card
+          key={thread.id}
+          onClick={() => onSelectThread(thread)}
+          className="cursor-pointer p-2 rounded bg-secondary flex items-center mb-2"
+        >
+          <Avatar className="mr-3">
+            <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
+            <AvatarFallback>{thread.name[0]}</AvatarFallback>
+          </Avatar>
+          <span>{thread.name}</span>
+        </Card>
+      ))}
+    </ScrollArea>
+  </aside>
+);
+
 }
 
 interface EndpointSelectProps {
@@ -386,6 +385,7 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
           selectedEndpoint={selectedEndpoint}
           setSelectedEndpoint={setSelectedEndpoint}
         />
+        <NewEndpointDialog addEndpoint={addEndpoint} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="text-lg">⋮</Button>
@@ -393,7 +393,6 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
           <DropdownMenuContent>
             <IngestItem/>
             <DropdownMenuItem><Link href="/help">Help</Link></DropdownMenuItem>
-            <NewEndpointDialog addEndpoint={addEndpoint} />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -408,32 +407,89 @@ interface ChatPanelProps {
 
 function ChatPanel({ messages }: ChatPanelProps) {
   return (
-    <ScrollArea className="flex flex-col p-4 space-y-4 flex-grow overflow-y-auto">
+    <>
+    <style>
+        {`
+          .hide-scrollbar {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+          }
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+          }
+        `}
+      </style>
+    <ScrollArea className="flex flex-col p-4 space-y-4 flex-grow overflow-y-auto hide-scrollbar">
       {messages.map((message, index) => (
         <TooltipProvider key={index}>
           <Tooltip>
-            <TooltipTrigger asChild>
+            <div
+              className={`relative flex ${
+                message.isUser ? "justify-end" : "justify-start"
+              }`}
+            >
+              {/* Message Bubble */}
               <div
-                className={`flex items-center space-x-3 p-2 rounded ${
-                  message.isUser ? "self-end" : ""
+                className={`relative inline-flex flex-col items-start p-3 rounded-[30px] bg-secondary ${
+                  message.isUser
+                    ? " text-right"
+                    : " text-left"
                 }`}
+                style={{
+                  borderRadius: "20px / 30px",
+                  maxWidth: "80%", // Max width for long messages
+                }}
               >
-                <Avatar>
-                  <AvatarImage src={ message.isUser ? USER_AVATAR_PLACEHOLDER : THREAD_IMAGE_PLACEHOLDER } alt={ message.content } />
-                  <AvatarFallback>{ message.isUser ? "U" : "R" }</AvatarFallback>
-                </Avatar>
-                <MarkdownRenderer content={message.content}/>
+                {/* Avatar */}
+                <div
+                  className={`absolute top-1 ${
+                    message.isUser ? "right-1" : "left-1"
+                  }`}
+                >
+                  <Avatar>
+                    <AvatarImage
+                      src={
+                        message.isUser
+                          ? USER_AVATAR_PLACEHOLDER
+                          : THREAD_IMAGE_PLACEHOLDER
+                      }
+                      alt={message.content}
+                    />
+                    <AvatarFallback>
+                      {message.isUser ? "U" : "R"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                {/* Tooltip Trigger: Wrap the message content */}
+                <TooltipTrigger asChild>
+                  <div
+                    className={`${
+                      message.isUser
+                        ? "mr-12 text-sm mt-1 mb-1"
+                        : "ml-12 text-sm mt-1 mb-1"
+                    }`}
+                  >
+                    <MarkdownRenderer content={message.content} />
+                  </div>
+                </TooltipTrigger>
               </div>
-            </TooltipTrigger>
-            <TooltipContent>
+            </div>
+            {/* Tooltip Content */}
+            <TooltipContent
+              className="absolute -translate-x-1/2 bottom-full mb-4 whitespace-nowrap px-2 py-1 bg-primary text-secondary">
               <p>{message.isUser ? "Sent by you" : "Received"}</p>
             </TooltipContent>
+            <div className='mb-4'/>
           </Tooltip>
         </TooltipProvider>
       ))}
     </ScrollArea>
+    </>
   );
 }
+
+
+
 
 interface CodeBlockProps {
   code: string
@@ -518,19 +574,37 @@ function InputArea({ onSendMessage }: InputAreaProps) {
   }, [input]);
 
   return (
-    <div className="flex items-center p-4 border-t">
-      <Textarea
-        ref={textareaRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Type a message..."
-        className="flex-grow p-2 border rounded resize-none"
-        rows={1}
-        style={{ overflow: "hidden" }}
-      />
-      <Button onClick={handleSend} className="ml-2" variant="outline">
-        <Send className="w-4 h-4" />
-      </Button>
+  <div className="flex items-center p-4 border-t">
+    <style>
+      {`
+        .scrollable-content {
+          overflow-y: auto;
+          max-height: 300px; /* Adjust this value to control the textarea's scrollable height */
+        }
+      `}
+    </style>
+    <div className="flex-grow mr-3">
+      <ScrollArea style={{ maxHeight: "300px" }}>
+        <div className="scrollable-content">
+          <Textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+            className="w-full mb-0 border rounded resize-none"
+            rows={1}
+            style={{ overflow: "hidden" }}
+          />
+        </div>
+      </ScrollArea>
     </div>
-  );
+    <Button onClick={handleSend} className="flex items-center justify-center" variant="outline">
+      <Send className="w-4 h-4" />
+    </Button>
+  </div>
+);
+
+
+
+
 }

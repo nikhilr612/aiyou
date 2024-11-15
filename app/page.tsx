@@ -17,8 +17,8 @@ export default function HomePage() {
           <h1 className="text-lg font-semibold">Aiyou</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <Link href="/host">Host</Link>
-          <Button variant="default">Get Started</Button>
+          <Link href="https://github.com">Host</Link>
+          <Button variant="default" ><Link href = "/login">Login</Link></Button>
           <ModeToggle />
         </div>
       </header>
@@ -45,7 +45,7 @@ export default function HomePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button variant="default" asChild>
-              <Link href="/get-started">Get Started</Link>
+              <Link href="/login">Get Started</Link>
             </Button>
           </CardContent>
         </Card>
@@ -86,7 +86,7 @@ export default function HomePage() {
         <p>
           © 2024 Aiyou. All Rights Reserved. Empowering language models.
           <br />
-          Contact: aiyou@mailinator.com
+          Contact: openinbox@mailinator.com
         </p>
         <div className="flex space-x-4">
           <Link href="/terms">
