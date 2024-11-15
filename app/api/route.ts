@@ -2,7 +2,7 @@ import { vecstore } from '../../lib/db';
 import { generateTextEmbedding } from '../../lib/model';
 
 // let embedder: FeatureExtractionPipeline;  // To store the pipeline instance
-const retriever_limit = 10;
+const retriever_limit = 5;
 
 export async function POST(req: any) {
 	let body = await req.json();
@@ -17,7 +17,7 @@ export async function POST(req: any) {
 		case "ingest":
 			// Add text embeddings into the vector store.
 			// Here 'meta' is some information about the source of the text being ingested.
-			await insertTextIntoStore(query_text, meta, '');
+			await insertTextIntoStore(query_text, meta);
 			return new Response(JSON.stringify({ error: false }));
 
 		case "retrieve":
@@ -43,6 +43,9 @@ export async function POST(req: any) {
 		// Just JS things.
 		if (error instanceof Error) errorMessage = error.message;
 		else errorMessage = String(error);
+
+		// Log this for us too..
+		console.debug(`An error occurred while handling method '${api_method}'.\n${errorMessage}\nERR: ${error}\n`);
 
 		return new Response(JSON.stringify({ error: true, message: errorMessage }));
 	}
@@ -71,9 +74,10 @@ async function createVectorSearchIndex() {
 }
 
 /**
- * Insert `text` into vector store taken from `source` with additional information in `meta`.
+ * Insert `text` into vector store with additional information (like `source`) in `meta`.
  * */
-async function insertTextIntoStore(text: string, source: string, meta: string) {
-  let embeddings = generateTextEmbedding(text);
-  await vecstore.add([{vector: embeddings, source: source}]);
+async function insertTextIntoStore(text: string, meta_json?: string, meta_object?: { [key: string]: any }) {
+  let embeddings = await generateTextEmbedding(text);
+  let meta = meta_json ? meta_json : JSON.stringify(meta_object || {});
+  await vecstore.add([{"vector": embeddings.tolist(), "text": text, "meta": meta}]);
 }

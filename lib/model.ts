@@ -17,10 +17,10 @@ export async function generateTextEmbedding(text: string): Promise<Tensor> {
     var embeddings: Tensor;
     if (embedder != null) {
       embeddings = await embedder(text);
-      console.log(embeddings);
       embeddings = embeddings.squeeze();
-      console.log(embeddings);
       let reduced_embeddings = embeddings.mean(0);
+      
+      console.debug("Reduced:", reduced_embeddings);
       return reduced_embeddings;
     } else {
       throw new Error("Pipeline not initialized");

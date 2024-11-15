@@ -22,7 +22,7 @@ import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea"; 
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Message, Endpoint, agentic_call } from "@/lib/llmcall";
+import { Message, Endpoint, agentic_call, chunkText } from "@/lib/llmcall";
 import Markdown from "react-markdown";
 import {
   Command,
@@ -138,9 +138,9 @@ export default function MainPage() {
 
   const respondToUserMessage = (endpoint: Endpoint, chatHistory: Message[], userMessage: Message) : string => {
     // Implement the logic to respond to the user's message using the endpoint, chat history, and user message
-    console.log("Endpoint:", endpoint);
-    console.log("Chat History:", chatHistory);
-    console.log("User Message:", userMessage);
+    console.debug("Endpoint:", endpoint);
+    console.debug("Chat History:", chatHistory);
+    console.debug("User Message:", userMessage);
     // Example: Make an API call to the endpoint with the chat history and user message
     throw new Error("Not implemented!");
   };
@@ -326,18 +326,47 @@ interface TopBarProps {
   addEndpoint: (endpoint: Endpoint) => void;
 }
 
+const USER_RAG_CHUNK_SIZE = 512;
+const TEXT_DELIMS = ['.\n\n', '\n\n', '.\n', '\n', '. ', '.'];
 
-interface IngestItemProps {
-    onFileIngested: (file: File) => Promise<void>;
-}
-
-function IngestItem({ onFileIngested } : IngestItemProps) {
+function IngestItem() {
+    let { toast } = useToast();
 
     const handleClick = () => {
       const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt'; // Only allow text files 
       input.onchange = async (event) => {
           const file = (event.target as HTMLInputElement).files?.[0] || null; 
-          if (file) await onFileIngested(file);
+          if (file) {
+            console.debug("Got:", file);
+            const text_content = await file.text();
+            const chunks = chunkText(text_content, USER_RAG_CHUNK_SIZE, TEXT_DELIMS);
+            let promises = chunks.map((chunk) => 
+              fetch("/api", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                  text: chunk,
+                  method: 'ingest',
+                  meta: `{ "source": "${file.name}" }`, // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
+                })
+              }).then(r => r.json())
+            );
+            let results = await Promise.all(promises);
+            let error_count = results.filter(a => a.error).length;
+            if (error_count > 0) {
+              console.error("Failed to ingest", error_count, "chunk(s) out of", results.length, "(", error_count / results.length * 100, "% )");
+              toast({
+                title: "Incomplete Ingestion",
+                description: "Some chunks were not ingested.",
+                variant: "destructive"
+              });
+            } else {
+              toast({
+                title: "Successful Ingestion",
+                description: "The provided document was completely chunked and ingested.",
+              });
+            }
+          }
       };
       input.click();
     };
@@ -362,9 +391,7 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
             <Button variant="ghost" className="text-lg">⋮</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <IngestItem onFileIngested={ async (f) => { 
-              console.log(await f.text());
-            } }/>
+            <IngestItem/>
             <DropdownMenuItem><Link href="/help">Help</Link></DropdownMenuItem>
             <NewEndpointDialog addEndpoint={addEndpoint} />
           </DropdownMenuContent>

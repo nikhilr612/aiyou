@@ -86,7 +86,7 @@ export default function HomePage() {
         <p>
           © 2024 Aiyou. All Rights Reserved. Empowering language models.
           <br />
-          Contact: openinbox@mailinator.com
+          Contact: aiyou@mailinator.com
         </p>
         <div className="flex space-x-4">
           <Link href="/terms">
