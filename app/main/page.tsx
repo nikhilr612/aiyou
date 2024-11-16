@@ -31,7 +31,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@/components/ui/newcommand";
 import {
   Popover,
   PopoverContent,
@@ -197,7 +197,7 @@ function SidePanel({ threads, onSelectThread, onNewThread, search, setSearch }: 
   <aside className="w-64 p-4 border-r hidden lg:block h-full">
     <div className="flex items-center mb-4">
       <Input
-        placeholder="Search or add"
+        placeholder="Search or Create"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full"
@@ -217,9 +217,10 @@ function SidePanel({ threads, onSelectThread, onNewThread, search, setSearch }: 
             <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
             <AvatarFallback>{thread.name[0]}</AvatarFallback>
           </Avatar>
-          <span>{thread.name}</span>
+          <span >{thread.name}</span>
         </Card>
       ))}
+      <span className="px-60"/>
     </ScrollArea>
   </aside>
 );
@@ -230,9 +231,10 @@ interface EndpointSelectProps {
   endpoints: Endpoint[];
   selectedEndpoint: Endpoint;
   setSelectedEndpoint: (endpoint: Endpoint) => void;
+  addEndpoint: (endpoint: Endpoint) => void;
 }
 
-function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint }: EndpointSelectProps) {
+function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint }: EndpointSelectProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -263,6 +265,7 @@ function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint }: En
                   <Check className={selectedEndpoint.target === endpoint.target ? "visible" : "invisible"} />
                 </CommandItem>
               ))}
+              <NewEndpointDialog addEndpoint={addEndpoint} />
             </CommandGroup>
           </CommandList>
         </Command>
@@ -290,7 +293,10 @@ function NewEndpointDialog({ addEndpoint }: NewEndpointDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost">New Endpoint</Button>
+        <Button variant="ghost" className="w-full justify-start text-left px-2 py-0 mb-0">
+  New Endpoint
+</Button>
+
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -374,7 +380,7 @@ function IngestItem() {
 };
 
 
-function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint }: TopBarProps) {
+function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint}: TopBarProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <h2 className="text-lg font-semibold">{threadName}</h2>
@@ -384,13 +390,14 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
           endpoints={endpoints}
           selectedEndpoint={selectedEndpoint}
           setSelectedEndpoint={setSelectedEndpoint}
+          addEndpoint={addEndpoint}
         />
-        <NewEndpointDialog addEndpoint={addEndpoint} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="text-lg">⋮</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            <NewEndpointDialog addEndpoint={addEndpoint} />
             <IngestItem/>
             <DropdownMenuItem><Link href="/help">Help</Link></DropdownMenuItem>
           </DropdownMenuContent>
@@ -419,7 +426,7 @@ function ChatPanel({ messages }: ChatPanelProps) {
           }
         `}
       </style>
-    <ScrollArea className="flex flex-col p-4 space-y-4 flex-grow overflow-y-auto hide-scrollbar">
+    <ScrollArea className="flex flex-col p-4 space-y-4 w-full flex-grow overflow-y-auto hide-scrollbar">
       {messages.map((message, index) => (
         <TooltipProvider key={index}>
           <Tooltip>
@@ -430,11 +437,7 @@ function ChatPanel({ messages }: ChatPanelProps) {
             >
               {/* Message Bubble */}
               <div
-                className={`relative inline-flex flex-col items-start p-3 rounded-[30px] bg-secondary ${
-                  message.isUser
-                    ? " text-right"
-                    : " text-left"
-                }`}
+                className={`relative inline-flex flex-col items-start p-3 rounded-[30px] bg-secondary `}
                 style={{
                   borderRadius: "20px / 30px",
                   maxWidth: "80%", // Max width for long messages
@@ -465,8 +468,8 @@ function ChatPanel({ messages }: ChatPanelProps) {
                   <div
                     className={`${
                       message.isUser
-                        ? "mr-12 text-sm mt-1 mb-1"
-                        : "ml-12 text-sm mt-1 mb-1"
+                        ? "mr-12 ml-2 text-sm mt-1 mb-1"
+                        : "ml-12 mr-2 text-sm mt-1 mb-1"
                     }`}
                   >
                     <MarkdownRenderer content={message.content} />
@@ -579,12 +582,12 @@ function InputArea({ onSendMessage }: InputAreaProps) {
       {`
         .scrollable-content {
           overflow-y: auto;
-          max-height: 300px; /* Adjust this value to control the textarea's scrollable height */
+          max-height: 300px; /* Adjust this value to control the textarea scrollable height */
         }
       `}
     </style>
     <div className="flex-grow mr-3">
-      <ScrollArea style={{ maxHeight: "300px" }}>
+      <ScrollArea>
         <div className="scrollable-content">
           <Textarea
             ref={textareaRef}
