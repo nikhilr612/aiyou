@@ -1,6 +1,7 @@
 "use client";
+
 import Image from "next/image";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,10 +68,9 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  let { toast } = useToast();
-  console.debug("hello")
-    const handleSubmit = async (e) => {
+  const { toast } = useToast();
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
       console.debug(email, password);
@@ -120,6 +120,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
+      <ModeToggle/> {/*Move this somewhere resonable*/}
       <header className="flex flex-col items-center space-y-2 mb-8">
         <div className="bg-black text-white p-2 rounded">
           <Image src="/images/logo.png" alt="Aiyou Logo" width={50} height={50} />
@@ -158,7 +159,7 @@ export default function LoginPage() {
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
               />
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {/*error && <p className="text-red-500 text-sm">{error}</p>*/}
             <Button variant="default" type="submit" className="w-full">Sign In</Button>
           </form>
           <div className="text-center mt-4">

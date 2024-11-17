@@ -3,7 +3,7 @@ import { FeatureExtractionPipeline, pipeline, Tensor } from '@huggingface/transf
 let embedder: FeatureExtractionPipeline | null;
 
 const sentence_transformer_model = "sentence-transformers/all-mpnet-base-v2";
-const embeddings_size = 768;
+// const embeddings_size = 768;
 
 try {
   embedder = await pipeline('feature-extraction', sentence_transformer_model);
@@ -14,11 +14,11 @@ try {
 
 export async function generateTextEmbedding(text: string): Promise<Tensor> {
   try {
-    var embeddings: Tensor;
+    let embeddings: Tensor;
     if (embedder != null) {
       embeddings = await embedder(text);
       embeddings = embeddings.squeeze();
-      let reduced_embeddings = embeddings.mean(0);
+      const reduced_embeddings = embeddings.mean(0);
       
       console.debug("Reduced:", reduced_embeddings);
       return reduced_embeddings;

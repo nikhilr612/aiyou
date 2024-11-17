@@ -86,7 +86,7 @@ export function chunkText(text: string, max_chunk_size: number, delims: string[]
   }
 
   let i = 0;
-  let res = [];
+  const res = [];
   while (i < text.length) {
     const c = nextChunk(i);
     i += c.length;
@@ -102,7 +102,7 @@ export function chunkText(text: string, max_chunk_size: number, delims: string[]
  * Addtionally, a notification callback can be provided which will be called to log any unexpected events during generation.
  * */
 export async function agentic_call(endpoint: Endpoint, history: Message[], query: string, notify: NotificationFn = default_notification_fn): Promise<string> {
-  let response1 = await llmcall(endpoint, history, query, "user", PROMPT1);
+  const response1 = await llmcall(endpoint, history, query, "user", PROMPT1);
   console.log("CRAG-Response1: ", response1.message.content);
 
   let response2;
@@ -148,10 +148,10 @@ export async function agentic_call(endpoint: Endpoint, history: Message[], query
     }),
   });
 
-  var docs_concat = "";
+  let docs_concat = "";
 
   try {
-    let result = await fetchResponse.json();
+    const result = await fetchResponse.json();
     if (result.error) {
       console.error("Document retrieval error: " + result.message);
       docs_concat = "Failed to fetch context. ERROR: " + result.message;
@@ -172,7 +172,7 @@ export async function agentic_call(endpoint: Endpoint, history: Message[], query
 
   console.log("CRAG-Final-Context: ", context);
 
-  let response3 = await llmcall(endpoint, history, query, "user", PROMPT2 + context);
+  const response3 = await llmcall(endpoint, history, query, "user", PROMPT2 + context);
   console.log("CRAG-Response3: ", response3);
 
   return response3.message.content;
@@ -204,7 +204,7 @@ async function jsExec(code: string): Promise<string> {
  * Return the response string.
  * */
 export async function base_llmcall(endpoint: Endpoint, history: Message[], query: string) : Promise<string> { 
-  let response = await llmcall(endpoint, history, query, "user");
+  const response = await llmcall(endpoint, history, query, "user");
   console.log("Ollama response: ", response);
   return response.message.content;
 }
@@ -217,11 +217,11 @@ export async function llmcall(
   sysprompt?: string,
   tools?: Tool[]  
 ) : Promise<ChatResponse> {
-  let ollama = new Ollama({
+  const ollama = new Ollama({
     host: endpoint.target
   });
 
-  let messages = history.map(function (m) {
+  const messages = history.map(function (m) {
     return {
       content: m.content,
       role: (m.isUser ? "user" : "assistant")

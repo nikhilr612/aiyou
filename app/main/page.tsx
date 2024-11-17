@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModeToggle } from "@/components/ui/modetoggle";
@@ -107,6 +107,8 @@ export default function MainPage() {
         router.push('/fuck-you');
         return;
       }
+
+      /// TODO: Replicate expiry check in [`route.ts`] as well.
       const {exp} = jwt.decode(token);
       console.debug(exp, (new Date().getTime() + 1) / 1000);
       if (exp < (new Date().getTime() + 1) / 1000)
@@ -202,101 +204,6 @@ export default function MainPage() {
 
   const handleSendMessage = async (text: string) => {
     const newMessage: Message = { content: text, isUser: true };
-    /*const getTokenFromIndexedDB = async (): Promise<string | null> => {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
-
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          // Create an object store for tokens if it doesn't already exist
-          if (!db.objectStoreNames.contains("tokens")) {
-            db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
-          }
-        };
-
-        request.onsuccess = (event) => {
-          const db = event.target.result;
-          const transaction = db.transaction(["tokens"], "readonly");
-          const store = transaction.objectStore("tokens");
-
-          const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
-
-          tokenRequest.onsuccess = () => {
-            resolve(tokenRequest.result ? tokenRequest.result.token : null);
-          };
-
-          tokenRequest.onerror = () => {
-            reject("Error retrieving token from IndexedDB");
-          };
-        };
-
-        request.onerror = () => {
-          reject("Error opening IndexedDB");
-        };
-      });
-    };
-
-    const validateUserToken = async () => {
-      let { toast } = useToast();
-      const router = useRouter();
-      try {
-        // Step 1: Retrieve token from IndexedDB
-        const token = await getTokenFromIndexedDB();
-        if (!token) {
-          toast({
-            title: "Error",
-            description: "No token found. Please log in again.",
-            variant: "destructive",
-          });
-          router('/fuck-you')
-          return;
-        }
-
-        // Step 2: Send API request to validate user
-        const response = await fetch('/api', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            method: 'validateUser',
-            username: 'user@example.com', // Replace with actual username or email
-            token: token,
-          }),
-        });
-
-        const result = await response.json();
-
-        // Step 3: Handle response
-        if (response.ok && !result.error) {
-          toast({
-            title: "Message sent successfully",
-            description: "",
-          });
-        } else if (result.error === "Invalid token.") {
-          toast({
-            title: "Invalid Token",
-            description: "Your session has expired. Please log in again.",
-            variant: "destructive",
-          });
-          router.push('/login'); // Redirect to the 'out' page
-        } else {
-          toast({
-            title: "Error",
-            description: result.error || "An error occurred.",
-            variant: "destructive",
-          });
-        }
-      } catch (err) {
-        console.error("Error during token validation:", err);
-        toast({
-          title: "Error",
-          description: "An error occurred during the validation process.",
-          variant: "destructive",
-        });
-      }
-    };
-    validateUserToken();*/
     setMessages(msgs => {
       return {...msgs, [currentThread.id]: [...msgs[currentThread.id], newMessage]};
     });
@@ -327,15 +234,6 @@ export default function MainPage() {
       setMessages({ ...messages, [newThread.id]: [] });
       setSearch("");
     }
-  };
-
-  const respondToUserMessage = (endpoint: Endpoint, chatHistory: Message[], userMessage: Message) : string => {
-    // Implement the logic to respond to the user's message using the endpoint, chat history, and user message
-    console.debug("Endpoint:", endpoint);
-    console.debug("Chat History:", chatHistory);
-    console.debug("User Message:", userMessage);
-    // Example: Make an API call to the endpoint with the chat history and user message
-    throw new Error("Not implemented!");
   };
 
   const addEndpoint = (endpoint: Endpoint) => {
@@ -528,7 +426,7 @@ const USER_RAG_CHUNK_SIZE = 512;
 const TEXT_DELIMS = ['.\n\n', '\n\n', '.\n', '\n', '. ', '.'];
 
 function IngestItem() {
-    let { toast } = useToast();
+    const { toast } = useToast();
 
     const handleClick = () => {
       const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt'; // Only allow text files 
@@ -538,7 +436,7 @@ function IngestItem() {
             console.debug("Got:", file);
             const text_content = await file.text();
             const chunks = chunkText(text_content, USER_RAG_CHUNK_SIZE, TEXT_DELIMS);
-            let promises = chunks.map((chunk) => 
+            const promises = chunks.map((chunk) => 
               fetch("/api", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -549,8 +447,8 @@ function IngestItem() {
                 })
               }).then(r => r.json())
             );
-            let results = await Promise.all(promises);
-            let error_count = results.filter(a => a.error).length;
+            const results = await Promise.all(promises);
+            const error_count = results.filter(a => a.error).length;
             if (error_count > 0) {
               console.error("Failed to ingest", error_count, "chunk(s) out of", results.length, "(", error_count / results.length * 100, "% )");
               toast({

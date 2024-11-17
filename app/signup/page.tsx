@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -49,8 +50,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState(null);
-  let { toast } = useToast();
+  const { toast } = useToast();
 
 
   const handleSubmit = async (e) => {
@@ -150,7 +150,6 @@ export default function SignupPage() {
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
               />
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button variant="default" type="submit" className="w-full">Create Account</Button>
           </form>
           <div className="text-center mt-4">

@@ -1,21 +1,19 @@
-import { vecstore } from '../../lib/db';
+import { vecstore, User } from '../../lib/db';
 import { generateTextEmbedding } from '../../lib/model';
-import {User} from '../../lib/userModel';
 import bcrypt from "bcrypt";
-import { Document, Model } from "mongoose";
 import jwt from "jsonwebtoken";
-// let embedder: FeatureExtractionPipeline;  // To store the pipeline instance
 const retriever_limit = 5;
 
-export async function POST(req: any) {
-	let body = await req.json();
+export async function POST(req: Request) {
+	const body = await req.json();
 
-	let query_text: string = body.text;
-	let api_method: string = body.method;
-	let meta: string       = body.meta;
-	let email:string 			 = body.email;
-	let password:string    = body.password;
-	let token:string       = body.token;
+	const query_text: string  = body.text;
+	const api_method: string  = body.method;
+	const meta: string        = body.meta;
+	const email: string 			= body.email;
+	const password: string    = body.password;
+	const token: string       = body.token;
+
 	try {
 		switch (api_method) {
 		
@@ -27,7 +25,7 @@ export async function POST(req: any) {
 
 		case "retrieve":
 			// Retrieve documents [array of strings ranked according to similarity score]. Do not return documents that don't belong to the user.
-			let relevant_documents = await queryVectorStore(query_text);
+			const relevant_documents = await queryVectorStore(query_text);
 			return new Response(JSON.stringify({ error: false, documents: relevant_documents }));
 
 		case "index":
@@ -44,7 +42,7 @@ export async function POST(req: any) {
 		    }
 
 		    // Check if the user exists or validate user data using checkUser function
-		    let back_res = await checkUser(meta, email, password);
+		    const back_res = await checkUser(meta, email, password);
 
 		    if (back_res=="exists") {
 		      // If the function returns an error message, respond with it
@@ -72,7 +70,7 @@ export async function POST(req: any) {
 			    console.debug("Email:", email, "Password:", password);
 
 			    // Call the authenticateUser function
-			    let back_res = await authenticateUser(email, password);
+			    const back_res = await authenticateUser(email, password);
 
 			    if (back_res.error) {
 			      // If the function returns an error message, respond with it
@@ -107,7 +105,7 @@ export async function POST(req: any) {
 			    console.debug("Password:", token);
 
 			    // Call the authenticateUser function
-			    let back_res = await validateUserToken(token);
+			    const back_res = await validateUserToken(token);
 
 			    if (back_res.error) {
 			      return new Response(JSON.stringify({ error: true, message: back_res.error }), { status: 402 });
@@ -130,7 +128,7 @@ export async function POST(req: any) {
 			  };
 
 		default:
-			return new Response(JSON.stringify({ error: true, message: "Invalid API method" }));
+			return new Response(JSON.stringify({ error: true, message: "Invalid API method" }), { status: 500 });
 		
 		}
 	} catch (error) {
@@ -151,14 +149,14 @@ export async function POST(req: any) {
  * Retrieve documents from 
  * */
 async function queryVectorStore(query_text: string): Promise<string[]> {
-	let embeddings = await generateTextEmbedding(query_text);
-  let documents = await vecstore
+	const embeddings = await generateTextEmbedding(query_text);
+  const documents = await vecstore
     .search(embeddings.tolist())
     .limit(retriever_limit).toArray();
 
-  return documents.map((d: any) => {
-  	let meta = JSON.parse(d.meta);
-  	let source: string = meta.source;
+  return documents.map(d => {
+  	const meta = JSON.parse(d.meta);
+  	const source: string = meta.source;
   	return `${d.text}\n\t- ${source}`;
   });
 }
@@ -173,28 +171,13 @@ async function createVectorSearchIndex() {
  * Insert `text` into vector store with additional information (like `source`) in `meta`.
  * */
 async function insertTextIntoStore(text: string, meta_json?: string, meta_object?: { [key: string]: any }) {
-  let embeddings = await generateTextEmbedding(text);
-  let meta = meta_json ? meta_json : JSON.stringify(meta_object || {});
+  const embeddings = await generateTextEmbedding(text);
+  const meta = meta_json ? meta_json : JSON.stringify(meta_object || {});
   await vecstore.add([{"vector": embeddings.tolist(), "text": text, "meta": meta}]);
 }
 
+const SECRET_KEY = process.env.SECRET_KEY;
 
-
-// Define the User interface for TypeScript
-interface IUser extends Document {
-  email: string;
-  password: string;
-  meta?: Record<string, any>; // Optional metadata
-}
-
-// Assume User is the Mongoose model
-
-const SECRET_KEY = "your_secret_key"; // Replace later(before pushing) with a secure secret key
-
-// Function to store token in IndexedDB
-
-
-// Updated checkUser function
 async function checkUser(
 	meta_object: Record<string, any> = {},
   email: string,
@@ -232,12 +215,26 @@ async function checkUser(
   }
 }
 
+/// *** DEV AUTH ESCAPE HATCH. DO NOT COMMIT *** 
+let DEV_AUTH_TOKEN = "";
+/// --------------------------------------------
+
 interface AuthResponse {
   token: string | null;
   error: string | null;
 }
 
 async function authenticateUser(email: string, password: string): Promise<AuthResponse> {
+	
+	/// TODO: REMOVE THIS
+	console.debug(process.env);
+	if (process.env.ALLOW_DEV_AUTH && email == process.env.DEV_AUTH_UNAME && password == process.env.DEV_AUTH_PASS) {
+		const token = jwt.sign( { email }, SECRET_KEY, { expiresIn: "10h" } );
+		DEV_AUTH_TOKEN = token;
+		return { token: DEV_AUTH_TOKEN, error: null };
+	}
+	/// ----
+
   try {
     // Check if the email exists in the database
     const existingUser = await User.findOne({ email });
@@ -268,7 +265,7 @@ async function validateUserToken(token: string): Promise<{ valid: boolean, error
     if (!existingUser) {
       return { valid: false, error: "Invalid token." };
     }
- 		const {exp} = jwt.decode(token);
+ 		jwt.decode(token);
     return { valid: true, error: null };
   } catch (err) {
     // Handle any errors that occur during the database query
