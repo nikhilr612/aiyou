@@ -39,9 +39,10 @@ import {
 } from "@/components/ui/popover";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
-
 import  materialDark  from "react-syntax-highlighter/dist/esm/styles/prism/material-dark";
-
+import { useRouter } from "next/navigation";
+//import {validateUserToken} from './validateUser'
+import jwt from "jsonwebtoken";
 interface Thread {
   id: number;
   name: string;
@@ -55,6 +56,108 @@ const initialEndpoints: Endpoint[] = [
 ];
 
 export default function MainPage() {
+    // For Showing toasts.
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const getTokenFromIndexedDBMain = async (): Promise<string | null> => {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          // Create an object store for tokens if it doesn't already exist
+          if (!db.objectStoreNames.contains("tokens")) {
+            db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
+          }
+        };
+
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          const transaction = db.transaction(["tokens"], "readonly");
+          const store = transaction.objectStore("tokens");
+
+          const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
+
+          tokenRequest.onsuccess = () => {
+            resolve(tokenRequest.result ? tokenRequest.result.token : null);
+          };
+
+          tokenRequest.onerror = () => {
+            reject("Error retrieving token from IndexedDB");
+          };
+        };
+
+        request.onerror = () => {
+          reject("Error opening IndexedDB");
+        };
+      });
+    };
+
+   const validateUserTokenMain = async () => {//shows login toast
+    try {
+      // Step 1: Retrieve token from IndexedDB
+      const token = await getTokenFromIndexedDBMain();
+      if (!token) {
+        toast({
+          title: "Error",
+          description: "No token found. Please log in again.",
+          variant: "destructive",
+        });
+        router.push('/fuck-you');
+        return;
+      }
+      const {exp} = jwt.decode(token);
+      console.debug(exp, (new Date().getTime() + 1) / 1000);
+      if (exp < (new Date().getTime() + 1) / 1000)
+        router.push('/login');
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          method: 'validateUser',
+          token: token,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Step 3: Handle response
+      if (response.ok && !result.error) {
+        toast({
+          title: "Login Successful",
+          description: "You are successfully logged in.",
+        });
+      } else if (result.error === "Invalid token.") {
+        toast({
+          title: "Invalid Token",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
+        router.push('/fuck-you');
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "An error occurred.",
+          variant: "destructive",
+        });
+        router.push('/fuck-you');
+      }
+    } catch (err) {
+      console.error("Error during token validation:", err);
+      toast({
+        title: "Error",
+        description: "An error occurred during the validation process.",
+        variant: "destructive",
+      });
+      router.push('/fuck-you');
+    }
+  };
+  
+
+
   const [threads, setThreads] = useState<Thread[]>([{ id: 1, name: "Thread" }]);
 
   const [currentThread, setCurrentThread] = useState<Thread>(threads[0]);
@@ -71,20 +174,16 @@ export default function MainPage() {
   const [endpoints, setEndpoints] = useState<Endpoint[]>(initialEndpoints);
 
   const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(initialEndpoints[0]);
-  
-  // For sShowing toasts.
-  const { toast } = useToast();
 
   useEffect(() => {
+    validateUserTokenMain();
     const storedThreads = localStorage.getItem('AIYOU_threads');
     setThreads(storedThreads ? JSON.parse(storedThreads) : [{ id: 1, name: "Thread" }]);
-
     const storedMessages = localStorage.getItem('AIYOU_messages');
     setMessages(storedMessages ? JSON.parse(storedMessages) : {
       1: [],
       2: [],
     });
-
     const storedCurrentThread = localStorage.getItem('AIYOU_currentThread');
     setCurrentThread(storedCurrentThread ? JSON.parse(storedCurrentThread) : threads[0]);
   }, []);
@@ -103,7 +202,101 @@ export default function MainPage() {
 
   const handleSendMessage = async (text: string) => {
     const newMessage: Message = { content: text, isUser: true };
-    
+    /*const getTokenFromIndexedDB = async (): Promise<string | null> => {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          // Create an object store for tokens if it doesn't already exist
+          if (!db.objectStoreNames.contains("tokens")) {
+            db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
+          }
+        };
+
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          const transaction = db.transaction(["tokens"], "readonly");
+          const store = transaction.objectStore("tokens");
+
+          const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
+
+          tokenRequest.onsuccess = () => {
+            resolve(tokenRequest.result ? tokenRequest.result.token : null);
+          };
+
+          tokenRequest.onerror = () => {
+            reject("Error retrieving token from IndexedDB");
+          };
+        };
+
+        request.onerror = () => {
+          reject("Error opening IndexedDB");
+        };
+      });
+    };
+
+    const validateUserToken = async () => {
+      let { toast } = useToast();
+      const router = useRouter();
+      try {
+        // Step 1: Retrieve token from IndexedDB
+        const token = await getTokenFromIndexedDB();
+        if (!token) {
+          toast({
+            title: "Error",
+            description: "No token found. Please log in again.",
+            variant: "destructive",
+          });
+          router('/fuck-you')
+          return;
+        }
+
+        // Step 2: Send API request to validate user
+        const response = await fetch('/api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            method: 'validateUser',
+            username: 'user@example.com', // Replace with actual username or email
+            token: token,
+          }),
+        });
+
+        const result = await response.json();
+
+        // Step 3: Handle response
+        if (response.ok && !result.error) {
+          toast({
+            title: "Message sent successfully",
+            description: "",
+          });
+        } else if (result.error === "Invalid token.") {
+          toast({
+            title: "Invalid Token",
+            description: "Your session has expired. Please log in again.",
+            variant: "destructive",
+          });
+          router.push('/login'); // Redirect to the 'out' page
+        } else {
+          toast({
+            title: "Error",
+            description: result.error || "An error occurred.",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        console.error("Error during token validation:", err);
+        toast({
+          title: "Error",
+          description: "An error occurred during the validation process.",
+          variant: "destructive",
+        });
+      }
+    };
+    validateUserToken();*/
     setMessages(msgs => {
       return {...msgs, [currentThread.id]: [...msgs[currentThread.id], newMessage]};
     });
