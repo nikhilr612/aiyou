@@ -37,3 +37,6 @@ app.env.*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# db files
+/text-embeddings-db/*

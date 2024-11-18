@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
@@ -25,13 +25,12 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>)
-{
+}>) {
   return (
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body style={{"overflow": "hidden"}}>
+        <body style={{ overflow: "hidden" }}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -44,5 +43,5 @@ export default function RootLayout({
         </body>
       </html>
     </>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,21 +6,30 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModeToggle } from "@/components/ui/modetoggle";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"; 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; 
-import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react"; 
-import { Textarea } from "@/components/ui/textarea"; 
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+} from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Send, Check, ChevronsUpDown, Copy } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Message, Endpoint, agentic_call, chunkText } from "@/lib/llmcall";
 import Markdown from "react-markdown";
@@ -39,7 +48,7 @@ import {
 } from "@/components/ui/popover";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
-import  materialDark  from "react-syntax-highlighter/dist/esm/styles/prism/material-dark";
+import materialDark from "react-syntax-highlighter/dist/esm/styles/prism/material-dark";
 import { useRouter } from "next/navigation";
 //import {validateUserToken} from './validateUser'
 import jwt from "jsonwebtoken";
@@ -56,45 +65,46 @@ const initialEndpoints: Endpoint[] = [
 ];
 
 export default function MainPage() {
-    // For Showing toasts.
-    const { toast } = useToast();
-    const router = useRouter();
+  // For Showing toasts.
+  const { toast } = useToast();
+  const router = useRouter();
 
-    const getTokenFromIndexedDBMain = async (): Promise<string | null> => {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
+  const getTokenFromIndexedDBMain = async (): Promise<string | null> => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
 
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          // Create an object store for tokens if it doesn't already exist
-          if (!db.objectStoreNames.contains("tokens")) {
-            db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
-          }
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        // Create an object store for tokens if it doesn't already exist
+        if (!db.objectStoreNames.contains("tokens")) {
+          db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
+        }
+      };
+
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(["tokens"], "readonly");
+        const store = transaction.objectStore("tokens");
+
+        const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
+
+        tokenRequest.onsuccess = () => {
+          resolve(tokenRequest.result ? tokenRequest.result.token : null);
         };
 
-        request.onsuccess = (event) => {
-          const db = event.target.result;
-          const transaction = db.transaction(["tokens"], "readonly");
-          const store = transaction.objectStore("tokens");
-
-          const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
-
-          tokenRequest.onsuccess = () => {
-            resolve(tokenRequest.result ? tokenRequest.result.token : null);
-          };
-
-          tokenRequest.onerror = () => {
-            reject("Error retrieving token from IndexedDB");
-          };
+        tokenRequest.onerror = () => {
+          reject("Error retrieving token from IndexedDB");
         };
+      };
 
-        request.onerror = () => {
-          reject("Error opening IndexedDB");
-        };
-      });
-    };
+      request.onerror = () => {
+        reject("Error opening IndexedDB");
+      };
+    });
+  };
 
-   const validateUserTokenMain = async () => {//shows login toast
+  const validateUserTokenMain = async () => {
+    //shows login toast
     try {
       // Step 1: Retrieve token from IndexedDB
       const token = await getTokenFromIndexedDBMain();
@@ -104,22 +114,21 @@ export default function MainPage() {
           description: "No token found. Please log in again.",
           variant: "destructive",
         });
-        router.push('/fuck-you');
+        router.push("/fuck-you");
         return;
       }
 
       /// TODO: Replicate expiry check in [`route.ts`] as well.
-      const {exp} = jwt.decode(token);
+      const { exp } = jwt.decode(token);
       console.debug(exp, (new Date().getTime() + 1) / 1000);
-      if (exp < (new Date().getTime() + 1) / 1000)
-        router.push('/login');
-      const response = await fetch('/api', {
-        method: 'POST',
+      if (exp < (new Date().getTime() + 1) / 1000) router.push("/login");
+      const response = await fetch("/api", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          method: 'validateUser',
+          method: "validateUser",
           token: token,
         }),
       });
@@ -138,14 +147,14 @@ export default function MainPage() {
           description: "Your session has expired. Please log in again.",
           variant: "destructive",
         });
-        router.push('/fuck-you');
+        router.push("/fuck-you");
       } else {
         toast({
           title: "Error",
           description: result.error || "An error occurred.",
           variant: "destructive",
         });
-        router.push('/fuck-you');
+        router.push("/fuck-you");
       }
     } catch (err) {
       console.error("Error during token validation:", err);
@@ -154,11 +163,9 @@ export default function MainPage() {
         description: "An error occurred during the validation process.",
         variant: "destructive",
       });
-      router.push('/fuck-you');
+      router.push("/fuck-you");
     }
   };
-  
-
 
   const [threads, setThreads] = useState<Thread[]>([{ id: 1, name: "Thread" }]);
 
@@ -175,53 +182,74 @@ export default function MainPage() {
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>(initialEndpoints);
 
-  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(initialEndpoints[0]);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint>(
+    initialEndpoints[0],
+  );
 
   useEffect(() => {
     validateUserTokenMain();
-    const storedThreads = localStorage.getItem('AIYOU_threads');
-    setThreads(storedThreads ? JSON.parse(storedThreads) : [{ id: 1, name: "Thread" }]);
-    const storedMessages = localStorage.getItem('AIYOU_messages');
-    setMessages(storedMessages ? JSON.parse(storedMessages) : {
-      1: [],
-      2: [],
-    });
-    const storedCurrentThread = localStorage.getItem('AIYOU_currentThread');
-    setCurrentThread(storedCurrentThread ? JSON.parse(storedCurrentThread) : threads[0]);
+    const storedThreads = localStorage.getItem("AIYOU_threads");
+    setThreads(
+      storedThreads ? JSON.parse(storedThreads) : [{ id: 1, name: "Thread" }],
+    );
+    const storedMessages = localStorage.getItem("AIYOU_messages");
+    setMessages(
+      storedMessages
+        ? JSON.parse(storedMessages)
+        : {
+            1: [],
+            2: [],
+          },
+    );
+    const storedCurrentThread = localStorage.getItem("AIYOU_currentThread");
+    setCurrentThread(
+      storedCurrentThread ? JSON.parse(storedCurrentThread) : threads[0],
+    );
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('AIYOU_threads', JSON.stringify(threads));
+    localStorage.setItem("AIYOU_threads", JSON.stringify(threads));
   }, [threads]);
 
   useEffect(() => {
-    localStorage.setItem('AIYOU_currentThread', JSON.stringify(currentThread));
+    localStorage.setItem("AIYOU_currentThread", JSON.stringify(currentThread));
   }, [currentThread]);
 
   useEffect(() => {
-    localStorage.setItem('AIYOU_messages', JSON.stringify(messages));
+    localStorage.setItem("AIYOU_messages", JSON.stringify(messages));
   }, [messages]);
 
   const handleSendMessage = async (text: string) => {
     const newMessage: Message = { content: text, isUser: true };
-    setMessages(msgs => {
-      return {...msgs, [currentThread.id]: [...msgs[currentThread.id], newMessage]};
+    setMessages((msgs) => {
+      return {
+        ...msgs,
+        [currentThread.id]: [...msgs[currentThread.id], newMessage],
+      };
     });
 
     try {
-      const response = await agentic_call(selectedEndpoint, messages[currentThread.id], text);
+      const response = await agentic_call(
+        selectedEndpoint,
+        messages[currentThread.id],
+        text,
+      );
       const response_message: Message = { content: response, isUser: false };
       if (response.trim().length > 0) {
-        setMessages(msgs => {
-          return {...msgs, [currentThread.id]: [...msgs[currentThread.id], response_message]};
+        setMessages((msgs) => {
+          return {
+            ...msgs,
+            [currentThread.id]: [...msgs[currentThread.id], response_message],
+          };
         });
       }
     } catch (error) {
       console.error("Error occurred during LLM call\n", error);
       toast({
         title: "LLM call failed",
-        description: "An unexpected error occurred during call to LLM endpoint. Check logs.",
-        variant: "destructive"
+        description:
+          "An unexpected error occurred during call to LLM endpoint. Check logs.",
+        variant: "destructive",
       });
     }
   };
@@ -242,12 +270,12 @@ export default function MainPage() {
     toast({
       title: "Created New Endpoint",
       description: `You can now choose ${endpoint.name} to connect to ${endpoint.target}`,
-      duration: 1000
-    })
+      duration: 1000,
+    });
   };
 
   return (
-    <div className="flex h-screen" style={{overflow: "hidden"}}>
+    <div className="flex h-screen" style={{ overflow: "hidden" }}>
       <SidePanel
         threads={threads}
         onSelectThread={setCurrentThread}
@@ -279,43 +307,48 @@ interface SidePanelProps {
   setSearch: (search: string) => void;
 }
 
-function SidePanel({ threads, onSelectThread, onNewThread, search, setSearch }: SidePanelProps) {
+function SidePanel({
+  threads,
+  onSelectThread,
+  onNewThread,
+  search,
+  setSearch,
+}: SidePanelProps) {
   const filteredThreads = threads.filter((thread) =>
-    thread.name.toLowerCase().includes(search.toLowerCase())
+    thread.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-  <aside className="w-64 p-4 border-r hidden lg:block h-full">
-    <div className="flex items-center mb-4">
-      <Input
-        placeholder="Search or Create"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full"
-      />
-      <Button onClick={onNewThread} className="ml-2" variant="outline">
-        <Plus className="w-4 h-4" />
-      </Button>
-    </div>
-    <ScrollArea className="h-full space-y-2">
-      {filteredThreads.map((thread) => (
-        <Card
-          key={thread.id}
-          onClick={() => onSelectThread(thread)}
-          className="cursor-pointer p-2 rounded bg-secondary flex items-center mb-2"
-        >
-          <Avatar className="mr-3">
-            <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
-            <AvatarFallback>{thread.name[0]}</AvatarFallback>
-          </Avatar>
-          <span >{thread.name}</span>
-        </Card>
-      ))}
-      <span className="px-60"/>
-    </ScrollArea>
-  </aside>
-);
-
+    <aside className="w-64 p-4 border-r hidden lg:block h-full">
+      <div className="flex items-center mb-4">
+        <Input
+          placeholder="Search or Create"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full"
+        />
+        <Button onClick={onNewThread} className="ml-2" variant="outline">
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+      <ScrollArea className="h-full space-y-2">
+        {filteredThreads.map((thread) => (
+          <Card
+            key={thread.id}
+            onClick={() => onSelectThread(thread)}
+            className="cursor-pointer p-2 rounded bg-secondary flex items-center mb-2"
+          >
+            <Avatar className="mr-3">
+              <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
+              <AvatarFallback>{thread.name[0]}</AvatarFallback>
+            </Avatar>
+            <span>{thread.name}</span>
+          </Card>
+        ))}
+        <span className="px-60" />
+      </ScrollArea>
+    </aside>
+  );
 }
 
 interface EndpointSelectProps {
@@ -325,8 +358,13 @@ interface EndpointSelectProps {
   addEndpoint: (endpoint: Endpoint) => void;
 }
 
-function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint }: EndpointSelectProps) {
-  const [open, setOpen] = useState(false)
+function EndpointSelect({
+  endpoints,
+  selectedEndpoint,
+  setSelectedEndpoint,
+  addEndpoint,
+}: EndpointSelectProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -347,13 +385,21 @@ function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint, addE
                   key={endpoint.target}
                   value={endpoint.target}
                   onSelect={(currentValue: string) => {
-                    const endpoint = endpoints.find(ep => ep.target === currentValue)
-                    if (endpoint) setSelectedEndpoint(endpoint)
-                    setOpen(false)
+                    const endpoint = endpoints.find(
+                      (ep) => ep.target === currentValue,
+                    );
+                    if (endpoint) setSelectedEndpoint(endpoint);
+                    setOpen(false);
                   }}
                 >
                   {endpoint.name}
-                  <Check className={selectedEndpoint.target === endpoint.target ? "visible" : "invisible"} />
+                  <Check
+                    className={
+                      selectedEndpoint.target === endpoint.target
+                        ? "visible"
+                        : "invisible"
+                    }
+                  />
                 </CommandItem>
               ))}
               <NewEndpointDialog addEndpoint={addEndpoint} />
@@ -362,7 +408,7 @@ function EndpointSelect({ endpoints, selectedEndpoint, setSelectedEndpoint, addE
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 interface NewEndpointDialogProps {
@@ -384,15 +430,19 @@ function NewEndpointDialog({ addEndpoint }: NewEndpointDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start text-left px-2 py-0 mb-0">
-  New Endpoint
-</Button>
-
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-left px-2 py-0 mb-0"
+        >
+          New Endpoint
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Endpoint</DialogTitle>
-          <DialogDescription>Enter the details for the new endpoint.</DialogDescription>
+          <DialogDescription>
+            Enter the details for the new endpoint.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Input
@@ -423,55 +473,75 @@ interface TopBarProps {
 }
 
 const USER_RAG_CHUNK_SIZE = 512;
-const TEXT_DELIMS = ['.\n\n', '\n\n', '.\n', '\n', '. ', '.'];
+const TEXT_DELIMS = [".\n\n", "\n\n", ".\n", "\n", ". ", "."];
 
 function IngestItem() {
-    const { toast } = useToast();
+  const { toast } = useToast();
 
-    const handleClick = () => {
-      const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt'; // Only allow text files 
-      input.onchange = async (event) => {
-          const file = (event.target as HTMLInputElement).files?.[0] || null; 
-          if (file) {
-            console.debug("Got:", file);
-            const text_content = await file.text();
-            const chunks = chunkText(text_content, USER_RAG_CHUNK_SIZE, TEXT_DELIMS);
-            const promises = chunks.map((chunk) => 
-              fetch("/api", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                  text: chunk,
-                  method: 'ingest',
-                  meta: `{ "source": "${file.name}" }`, // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
-                })
-              }).then(r => r.json())
-            );
-            const results = await Promise.all(promises);
-            const error_count = results.filter(a => a.error).length;
-            if (error_count > 0) {
-              console.error("Failed to ingest", error_count, "chunk(s) out of", results.length, "(", error_count / results.length * 100, "% )");
-              toast({
-                title: "Incomplete Ingestion",
-                description: "Some chunks were not ingested.",
-                variant: "destructive"
-              });
-            } else {
-              toast({
-                title: "Successful Ingestion",
-                description: "The provided document was completely chunked and ingested.",
-              });
-            }
-          }
-      };
-      input.click();
+  const handleClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".txt"; // Only allow text files
+    input.onchange = async (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0] || null;
+      if (file) {
+        console.debug("Got:", file);
+        const text_content = await file.text();
+        const chunks = chunkText(
+          text_content,
+          USER_RAG_CHUNK_SIZE,
+          TEXT_DELIMS,
+        );
+        const promises = chunks.map((chunk) =>
+          fetch("/api", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: chunk,
+              method: "ingest",
+              meta: `{ "source": "${file.name}" }`, // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
+            }),
+          }).then((r) => r.json()),
+        );
+        const results = await Promise.all(promises);
+        const error_count = results.filter((a) => a.error).length;
+        if (error_count > 0) {
+          console.error(
+            "Failed to ingest",
+            error_count,
+            "chunk(s) out of",
+            results.length,
+            "(",
+            (error_count / results.length) * 100,
+            "% )",
+          );
+          toast({
+            title: "Incomplete Ingestion",
+            description: "Some chunks were not ingested.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Successful Ingestion",
+            description:
+              "The provided document was completely chunked and ingested.",
+          });
+        }
+      }
     };
+    input.click();
+  };
 
-    return (<DropdownMenuItem onClick={handleClick}>Ingest</DropdownMenuItem>);
-};
+  return <DropdownMenuItem onClick={handleClick}>Ingest</DropdownMenuItem>;
+}
 
-
-function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, addEndpoint}: TopBarProps) {
+function TopBar({
+  threadName,
+  endpoints,
+  selectedEndpoint,
+  setSelectedEndpoint,
+  addEndpoint,
+}: TopBarProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <h2 className="text-lg font-semibold">{threadName}</h2>
@@ -485,12 +555,16 @@ function TopBar({ threadName, endpoints, selectedEndpoint, setSelectedEndpoint, 
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="text-lg">⋮</Button>
+            <Button variant="ghost" className="text-lg">
+              ⋮
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <NewEndpointDialog addEndpoint={addEndpoint} />
-            <IngestItem/>
-            <DropdownMenuItem><Link href="/help">Help</Link></DropdownMenuItem>
+            <IngestItem />
+            <DropdownMenuItem>
+              <Link href="/help">Help</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -506,7 +580,7 @@ interface ChatPanelProps {
 function ChatPanel({ messages }: ChatPanelProps) {
   return (
     <>
-    <style>
+      <style>
         {`
           .hide-scrollbar {
             scrollbar-width: none; /* Firefox */
@@ -517,77 +591,73 @@ function ChatPanel({ messages }: ChatPanelProps) {
           }
         `}
       </style>
-    <ScrollArea className="flex flex-col p-4 space-y-4 w-full flex-grow overflow-y-auto hide-scrollbar">
-      {messages.map((message, index) => (
-        <TooltipProvider key={index}>
-          <Tooltip>
-            <div
-              className={`relative flex ${
-                message.isUser ? "justify-end" : "justify-start"
-              }`}
-            >
-              {/* Message Bubble */}
+      <ScrollArea className="flex flex-col p-4 space-y-4 w-full flex-grow overflow-y-auto hide-scrollbar">
+        {messages.map((message, index) => (
+          <TooltipProvider key={index}>
+            <Tooltip>
               <div
-                className={`relative inline-flex flex-col items-start p-3 rounded-[30px] bg-secondary `}
-                style={{
-                  borderRadius: "20px / 30px",
-                  maxWidth: "80%", // Max width for long messages
-                }}
+                className={`relative flex ${
+                  message.isUser ? "justify-end" : "justify-start"
+                }`}
               >
-                {/* Avatar */}
+                {/* Message Bubble */}
                 <div
-                  className={`absolute top-1 ${
-                    message.isUser ? "right-1" : "left-1"
-                  }`}
+                  className={`relative inline-flex flex-col items-start p-3 rounded-[30px] bg-secondary `}
+                  style={{
+                    borderRadius: "20px / 30px",
+                    maxWidth: "80%", // Max width for long messages
+                  }}
                 >
-                  <Avatar>
-                    <AvatarImage
-                      src={
-                        message.isUser
-                          ? USER_AVATAR_PLACEHOLDER
-                          : THREAD_IMAGE_PLACEHOLDER
-                      }
-                      alt={message.content}
-                    />
-                    <AvatarFallback>
-                      {message.isUser ? "U" : "R"}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                {/* Tooltip Trigger: Wrap the message content */}
-                <TooltipTrigger asChild>
+                  {/* Avatar */}
                   <div
-                    className={`${
-                      message.isUser
-                        ? "mr-12 ml-2 text-sm mt-1 mb-1"
-                        : "ml-12 mr-2 text-sm mt-1 mb-1"
+                    className={`absolute top-1 ${
+                      message.isUser ? "right-1" : "left-1"
                     }`}
                   >
-                    <MarkdownRenderer content={message.content} />
+                    <Avatar>
+                      <AvatarImage
+                        src={
+                          message.isUser
+                            ? USER_AVATAR_PLACEHOLDER
+                            : THREAD_IMAGE_PLACEHOLDER
+                        }
+                        alt={message.content}
+                      />
+                      <AvatarFallback>
+                        {message.isUser ? "U" : "R"}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
-                </TooltipTrigger>
+                  {/* Tooltip Trigger: Wrap the message content */}
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`${
+                        message.isUser
+                          ? "mr-12 ml-2 text-sm mt-1 mb-1"
+                          : "ml-12 mr-2 text-sm mt-1 mb-1"
+                      }`}
+                    >
+                      <MarkdownRenderer content={message.content} />
+                    </div>
+                  </TooltipTrigger>
+                </div>
               </div>
-            </div>
-            {/* Tooltip Content */}
-            <TooltipContent
-              className="absolute -translate-x-1/2 bottom-full mb-4 whitespace-nowrap px-2 py-1 bg-primary text-secondary">
-              <p>{message.isUser ? "Sent by you" : "Received"}</p>
-            </TooltipContent>
-            <div className='mb-4'/>
-          </Tooltip>
-        </TooltipProvider>
-      ))}
-    </ScrollArea>
+              {/* Tooltip Content */}
+              <TooltipContent className="absolute -translate-x-1/2 bottom-full mb-4 whitespace-nowrap px-2 py-1 bg-primary text-secondary">
+                <p>{message.isUser ? "Sent by you" : "Received"}</p>
+              </TooltipContent>
+              <div className="mb-4" />
+            </Tooltip>
+          </TooltipProvider>
+        ))}
+      </ScrollArea>
     </>
   );
 }
 
-
-
-
 interface CodeBlockProps {
-  code: string
-  language: string
+  code: string;
+  language: string;
 }
 
 export function CodeBlock({ code, language }: CodeBlockProps) {
@@ -596,7 +666,7 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
   };
 
   return (
-    <div style={{position: "relative"}}>
+    <div style={{ position: "relative" }}>
       <SyntaxHighlighter
         language={language}
         style={materialDark}
@@ -605,15 +675,19 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
       >
         {code}
       </SyntaxHighlighter>
-      <Button onClick={handleCopy} variant="outline" style = {{position: "absolute", top: "10px", right: "10px"}} >
-        <Copy/> Copy
+      <Button
+        onClick={handleCopy}
+        variant="outline"
+        style={{ position: "absolute", top: "10px", right: "10px" }}
+      >
+        <Copy /> Copy
       </Button>
     </div>
-  )
+  );
 }
 
 interface MarkdownRendererProps {
-  content: string
+  content: string;
 }
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
@@ -622,27 +696,26 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       className="display-block"
       components={{
         code(props) {
-          const { children, className, ...rest } = props
-          const match = /language-(\w+)/.exec(className || '')
+          const { children, className, ...rest } = props;
+          const match = /language-(\w+)/.exec(className || "");
           return match ? (
             <CodeBlock
               {...rest}
               language={match[1]}
-              code={String(children).replace(/\n$/, '')}
+              code={String(children).replace(/\n$/, "")}
             />
           ) : (
             <code {...rest} className={className}>
               {children}
             </code>
-          )
-        }
+          );
+        },
       }}
     >
       {content}
     </Markdown>
-  )
+  );
 }
-
 
 // Input Area Component
 interface InputAreaProps {
@@ -668,37 +741,37 @@ function InputArea({ onSendMessage }: InputAreaProps) {
   }, [input]);
 
   return (
-  <div className="flex items-center p-4 border-t">
-    <style>
-      {`
+    <div className="flex items-center p-4 border-t">
+      <style>
+        {`
         .scrollable-content {
           overflow-y: auto;
           max-height: 300px; /* Adjust this value to control the textarea scrollable height */
         }
       `}
-    </style>
-    <div className="flex-grow mr-3">
-      <ScrollArea>
-        <div className="scrollable-content">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
-            className="w-full mb-0 border rounded resize-none"
-            rows={1}
-            style={{ overflow: "hidden" }}
-          />
-        </div>
-      </ScrollArea>
+      </style>
+      <div className="flex-grow mr-3">
+        <ScrollArea>
+          <div className="scrollable-content">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a message..."
+              className="w-full mb-0 border rounded resize-none"
+              rows={1}
+              style={{ overflow: "hidden" }}
+            />
+          </div>
+        </ScrollArea>
+      </div>
+      <Button
+        onClick={handleSend}
+        className="flex items-center justify-center"
+        variant="outline"
+      >
+        <Send className="w-4 h-4" />
+      </Button>
     </div>
-    <Button onClick={handleSend} className="flex items-center justify-center" variant="outline">
-      <Send className="w-4 h-4" />
-    </Button>
-  </div>
-);
-
-
-
-
+  );
 }

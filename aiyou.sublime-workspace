@@ -1,943 +1,414 @@
 {
-	"auto_complete":
-	{
-		"selected_items":
-		[
-			[
-				"f",
-				"function"
-			],
-			[
-				"sc",
-				"section"
-			],
-			[
-				"s",
-				"stroke"
-			],
-			[
-				"node",
-				"node_empty"
-			],
-			[
-				"Tree",
-				"TreeComparator_t"
-			],
-			[
-				"Com",
-				"TreeComparator_t"
-			],
-			[
-				"Binar",
-				"BinarySearchTreeVisitor"
-			],
-			[
-				"Bina",
-				"BinarySearchTreeVisitor"
-			],
-			[
-				"Binary",
-				"BinarySearchTreeVisitor"
-			],
-			[
-				"Walk",
-				"WalkRight"
-			],
-			[
-				"Unit",
-				"UnitState"
-			],
-			[
-				"Uni",
-				"UnitState::WalkUp"
-			],
-			[
-				"c",
-				"component_diff_cmp(…)"
-			],
-			[
-				"Orde",
-				"Ordering::Less"
-			],
-			[
-				"Or",
-				"Ordering::Greater"
-			],
-			[
-				"V",
-				"Vector2"
-			],
-			[
-				"W",
-				"WalkRight"
-			],
-			[
-				"UnitState",
-				"UnitState (use crate::unit::UnitState)"
-			],
-			[
-				"UnitS",
-				"UnitState::WalkRight"
-			],
-			[
-				"in",
-				"into() (as Into)"
-			],
-			[
-				"p",
-				"pathpoints"
-			],
-			[
-				"Ray",
-				"RaylibHandle (use raylib::RaylibHandle)"
-			],
-			[
-				"Tile",
-				"TileMap (use crate::map::TileMap)"
-			],
-			[
-				"co",
-				"collect() (as Iterator)"
-			],
-			[
-				"Grid",
-				"GridLoc (use crate::plane::GridLoc)"
-			],
-			[
-				"Vec",
-				"Vector2 (use raylib::math::Vector2)"
-			],
-			[
-				"d",
-				"filled_diamond(…)"
-			],
-			[
-				"fo",
-				"fog_of_war"
-			],
-			[
-				"cl",
-				"clear_up_fog(…)"
-			],
-			[
-				"map",
-				"map_rect"
-			],
-			[
-				"for",
-				"for_each(…) (as Iterator)"
-			],
-			[
-				"fil",
-				"filter_map(…) (as Iterator)"
-			],
-			[
-				"G",
-				"GridRect"
-			],
-			[
-				"Gr",
-				"GridRect"
-			],
-			[
-				"ca",
-				"cam_pos"
-			],
-			[
-				"max",
-				"max_x"
-			],
-			[
-				"re",
-				"render_size()"
-			],
-			[
-				"draw",
-				"draw_color_tile"
-			],
-			[
-				"B",
-				"BLACK"
-			],
-			[
-				"v",
-				"vr"
-			],
-			[
-				"view",
-				"view_rect(…) (use crate::map::view_rect)"
-			],
-			[
-				"m",
-				"map_rect()"
-			],
-			[
-				"ma",
-				"map_rect()"
-			],
-			[
-				"sa",
-				"saturating_sub(…)"
-			],
-			[
-				"sat",
-				"saturating_sub(…)"
-			],
-			[
-				"r",
-				"rsize"
-			],
-			[
-				"po",
-				"point_v"
-			],
-			[
-				"sca",
-				"scaled_vec(…)"
-			],
-			[
-				"sk",
-				"skip(…) (as Iterator)"
-			],
-			[
-				"draw_circl",
-				"draw_circle_v(…) (as RaylibDraw)"
-			],
-			[
-				"t",
-				"tile_size()"
-			],
-			[
-				"draw_c",
-				"draw_color_tile(…)"
-			],
-			[
-				"dra",
-				"draw_attack_tile(…)"
-			],
-			[
-				"Til",
-				"TileSize (use crate::map::TileSize)"
-			],
-			[
-				"BLA",
-				"BLACK"
-			],
-			[
-				"draw_rectan",
-				"draw_rectangle_lines(…) (as RaylibDraw)"
-			],
-			[
-				"Gri",
-				"GridRect"
-			],
-			[
-				"ren",
-				"render_height"
-			],
-			[
-				"Ve",
-				"Vector2{}"
-			],
-			[
-				"cam",
-				"cam_pos"
-			],
-			[
-				"rend",
-				"render_height"
-			],
-			[
-				"si",
-				"tile_size()"
-			],
-			[
-				"min",
-				"min_y"
-			],
-			[
-				"ra",
-				"radius"
-			],
-			[
-				"lo",
-				"logging (use raylib::logging)"
-			],
-			[
-				"D",
-				"Diamond"
-			],
-			[
-				"filter",
-				"filter_map(…) (as Iterator)"
-			],
-			[
-				"Dia",
-				"DiamondArm::SouthEast"
-			],
-			[
-				"cent",
-				"center_y"
-			],
-			[
-				"ce",
-				"center_x"
-			],
-			[
-				"center",
-				"center_y"
-			],
-			[
-				"Nor",
-				"NorthEast"
-			],
-			[
-				"Diamon",
-				"DiamondArm"
-			],
-			[
-				"Diam",
-				"DiamondArm"
-			],
-			[
-				"Diamo",
-				"DiamondArm"
-			],
-			[
-				"Sou",
-				"SouthWest"
-			],
-			[
-				"Di",
-				"DiamondFlag"
-			],
-			[
-				"sta",
-				"state_flag"
-			],
-			[
-				"Diamond",
-				"DiamondPoint"
-			],
-			[
-				"ne",
-				"next() (as Iterator)"
-			],
-			[
-				"satur",
-				"saturating_sub(…)"
-			],
-			[
-				"No",
-				"NorthWest"
-			],
-			[
-				"N",
-				"NorthWest"
-			],
-			[
-				"Seriali",
-				"SerializeTuple"
-			],
-			[
-				"too",
-				"clippy::too_many_arguments"
-			],
-			[
-				"all",
-				"allow(…)"
-			],
-			[
-				"draw_rec",
-				"draw_rectangle_v(…) (as RaylibDraw)"
-			],
-			[
-				"draw_re",
-				"draw_rectangle_v(…) (as RaylibDraw)"
-			],
-			[
-				"un",
-				"unwrap_or_default()"
-			],
-			[
-				"render",
-				"render_height"
-			],
-			[
-				"tile",
-				"tile_size: &TileSize,"
-			],
-			[
-				"sort",
-				"sort_by(…)"
-			],
-			[
-				"get",
-				"get_mut(…)"
-			],
-			[
-				"de",
-				"deprecated"
-			],
-			[
-				"GridL",
-				"GridLoc"
-			],
-			[
-				"ZER",
-				"ZERO_POINT"
-			],
-			[
-				"allow",
-				"allow(…)"
-			],
-			[
-				"De",
-				"Default"
-			],
-			[
-				"my",
-				"myunit"
-			],
-			[
-				"O",
-				"Ordinate"
-			],
-			[
-				"try",
-				"try_from(…) (as TryFrom)"
-			],
-			[
-				"Re",
-				"Resources"
-			],
-			[
-				"In",
-				"InputState"
-			],
-			[
-				"draw_uni",
-				"draw_unit_attack_tiles"
-			],
-			[
-				"res",
-				"ress: &mut Resources<'_>"
-			],
-			[
-				"spa",
-				"spawn_random_enemy(…)"
-			],
-			[
-				"or",
-				"or_insert_with(…)"
-			],
-			[
-				"uni",
-				"unit_positions"
-			],
-			[
-				"on_hover_",
-				"on_hover_texttooltip"
-			],
-			[
-				"on",
-				"on_hover_texttooltip"
-			],
-			[
-				"on_",
-				"on_hover_texttooltip"
-			],
-			[
-				"on_ho",
-				"on_hover_texttooltip"
-			],
-			[
-				"h",
-				"on_hover_uitooltip"
-			],
-			[
-				"l",
-				"last_unit_mount"
-			],
-			[
-				"T_WIN",
-				"T_WINGS_ICON"
-			],
-			[
-				"draw_tex",
-				"draw_texture_v(…) (as RaylibDraw)"
-			],
-			[
-				"WH",
-				"WHITE"
-			],
-			[
-				"draw_texture",
-				"draw_texture_v(…) (as RaylibDraw)"
-			],
-			[
-				"g",
-				"get(…)"
-			],
-			[
-				"T_S",
-				"T_SWORD_ICON"
-			],
-			[
-				"T_M",
-				"T_MOUNT_ICON"
-			],
-			[
-				"FO",
-				"T_FOOT_ICON"
-			],
-			[
-				"las",
-				"last_unit_gender"
-			],
-			[
-				"IC",
-				"ICON_LIST_WIDTH"
-			],
-			[
-				"a",
-				"allocate_exact_size(…)"
-			],
-			[
-				"mo",
-				"movement"
-			],
-			[
-				"NA",
-				"NATIVE_PXPP (use crate::display::NATIVE_PXPP)"
-			],
-			[
-				"win",
-				"window_fill"
-			]
-		]
-	},
-	"buffers":
-	[
-	],
-	"build_system": "",
-	"build_system_choices":
-	[
-		[
-			[
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					""
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Automatic"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Run"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Run (with args)..."
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Check"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Test"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Test (with args)..."
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Bench"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Clean"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Document"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Clippy"
-				],
-				[
-					"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-					"Script"
-				]
-			],
-			[
-				"Packages/Rust Enhanced/RustEnhanced.sublime-build",
-				"Run"
-			]
-		]
-	],
-	"build_varint": "",
-	"command_palette":
-	{
-		"height": 0.0,
-		"last_filter": "",
-		"selected_items":
-		[
-			[
-				"pack",
-				"Package Control: Install Package"
-			],
-			[
-				"termi",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"term",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"termina",
-				"Preferences: Terminus Command Palette"
-			],
-			[
-				"package cont",
-				"Package Control: Install Package"
-			],
-			[
-				"package",
-				"Package Control: Remove Package"
-			],
-			[
-				"termin",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"new tab",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"terminal",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"Terminal",
-				"Terminus: Open Default Shell in Tab (View)"
-			],
-			[
-				"Termainal",
-				"Terminus: Open Default Shell in Panel"
-			],
-			[
-				"pa",
-				"Package Control: Install Package"
-			],
-			[
-				"package control inst",
-				"Package Control: Install Package"
-			],
-			[
-				"install",
-				"Package Control: Install Package"
-			],
-			[
-				"install package",
-				"Install Package Control"
-			],
-			[
-				"inst",
-				"Install Package Control"
-			]
-		],
-		"width": 0.0
-	},
-	"console":
-	{
-		"height": 0.0,
-		"history":
-		[
-		]
-	},
-	"distraction_free":
-	{
-		"menu_visible": true,
-		"show_minimap": false,
-		"show_open_files": false,
-		"show_tabs": false,
-		"side_bar_visible": false,
-		"status_bar_visible": false
-	},
-	"expanded_folders":
-	[
-		"/C/Users/nikhi/OneDrive/Documents/NodeProjects/aiyou"
-	],
-	"file_history":
-	[
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/fow.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/convo.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/campaign.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/unit.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/utils.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/display.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/priort.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/main.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/encounter.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/trigger.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/movement.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/mod.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/battle.rs",
-		"/C/Users/nikhi/OneDrive/Documents/NodeProjects/aiyou/lib/utils.ts",
-		"/?wsl$/Debian/home/user/C2024/DSA/Tree/threaded_binary_tree.h",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test8.html",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test7.html",
-		"/?wsl.localhost/Debian/home/user/C2024/DSA/Tree/binary_search_tree.h",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test5.html",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test6.html",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/mod.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/plane.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/map.rs",
-		"/C/Users/nikhi/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/std/src/collections/hash/map.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/basic.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/prepbattle.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/tileset/overworld.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/data.rs",
-		"/C/Users/nikhi/OneDrive/Documents/Zig/ziglings/exercises/084_async.zig",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/astar.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/ReadMe.md",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/ui.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/oliver.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/sonya.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/combat.rs",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/egui-0.28.1/src/containers/window.rs",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/egui-0.28.1/src/containers/frame.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/campaigns/test/level1.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/.gitignore",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/rustfmt.toml",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/saves/test.sav",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/math.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/campaigns/test.ron",
-		"/C/Users/nikhi/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/CREDITS.md",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/Cargo.toml",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/drawing.rs",
-		"/C/Users/nikhi/.cargo/git/checkouts/egui-raylib-6526e567d30088aa/bffb43f/src/lib.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/drawing.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/rush.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/textintro.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/fog.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai.rs",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.204/src/de/mod.rs",
-		"/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/text.rs",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/postapi.ts",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/server.ts",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/client.js",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/index.html",
-		"/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/css/style.css",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/carl.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_wind/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/pasteframes.py",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/alphacol.py",
-		"/C/Users/nikhi/OneDrive/Documents/New folder/first-contributions/Contributors.md",
-		"/C/Users/nikhi/OneDrive/Documents/Python/toyscheme/parser.py",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/benedict.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/louhel.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/einar.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/dorothy.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/daniel.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/recolour.py",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level2_lake_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/microprior.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level2_lake_units.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/LICENCE.md",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_bow/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_staff/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_bow/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_axe/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_axe/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_lance/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_sword/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_lance/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_sword/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_refresh/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/animanal.py",
-		"/C/Users/nikhi/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.171/src/de/mod.rs",
-		"/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia591_04_21.ck2",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_staff/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_staff/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_bow/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_axe/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_axe/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/spacker.py",
-		"/C/Users/nikhi/.cargo/registry/src/github.com-1ecc6299db9ec823/raylib-3.7.0/src/core/math.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_lance/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_lance/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_sword/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/mapgen.py",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1_units.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_sword/anim_data.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1.json",
-		"/C/Users/nikhi/Tiled Works/FE-style Map mapking/level1.json",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/maps/test1.ron",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/fib.s",
-		"/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia511_10_29.ck2",
-		"/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia487_05_13.ck2",
-		"/C/Users/nikhi/OneDrive/Documents/testwebview.py",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/winhook/src/apicall.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/helloworld.s",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/piout.s",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/exec.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/Cargo.toml",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/opcode.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/build.cmd",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/args.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/dataheader.rs",
-		"/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/types.rs"
-	],
-	"find":
-	{
-		"height": 23.2
-	},
-	"find_in_files":
-	{
-		"height": 119.2,
-		"where_history":
-		[
-		]
-	},
-	"find_state":
-	{
-		"case_sensitive": false,
-		"find_history":
-		[
-		],
-		"highlight": true,
-		"in_selection": false,
-		"preserve_case": false,
-		"regex": false,
-		"replace_history":
-		[
-		],
-		"reverse": false,
-		"scrollbar_highlights": true,
-		"show_context": true,
-		"use_buffer2": true,
-		"use_gitignore": true,
-		"whole_word": false,
-		"wrap": true
-	},
-	"groups":
-	[
-		{
-			"sheets":
-			[
-			]
-		}
-	],
-	"incremental_find":
-	{
-		"height": 23.2
-	},
-	"input":
-	{
-		"height": 44.0
-	},
-	"layout":
-	{
-		"cells":
-		[
-			[
-				0,
-				0,
-				1,
-				1
-			]
-		],
-		"cols":
-		[
-			0.0,
-			1.0
-		],
-		"rows":
-		[
-			0.0,
-			1.0
-		]
-	},
-	"menu_visible": true,
-	"output.LSP Log Panel":
-	{
-		"height": 98.4000015259
-	},
-	"output.diagnostics":
-	{
-		"height": 98.4000015259
-	},
-	"output.exec":
-	{
-		"height": 138.0
-	},
-	"output.find_results":
-	{
-		"height": 0.0
-	},
-	"output.mdpopups":
-	{
-		"height": 0.0
-	},
-	"pinned_build_system": "Packages/Rust Enhanced/RustEnhanced.sublime-build",
-	"project": "aiyou.sublime-project",
-	"replace":
-	{
-		"height": 43.2
-	},
-	"save_all_on_build": true,
-	"select_file":
-	{
-		"height": 0.0,
-		"last_filter": "",
-		"selected_items":
-		[
-		],
-		"width": 0.0
-	},
-	"select_project":
-	{
-		"height": 500.0,
-		"last_filter": "",
-		"selected_items":
-		[
-			[
-				"",
-				"C:\\Users\\nikhi\\OneDrive\\Documents\\Python\\ml-experiments\\ml-experiments.sublime-project"
-			]
-		],
-		"width": 380.0
-	},
-	"select_symbol":
-	{
-		"height": 0.0,
-		"last_filter": "",
-		"selected_items":
-		[
-		],
-		"width": 0.0
-	},
-	"selected_group": 0,
-	"settings":
-	{
-	},
-	"show_minimap": true,
-	"show_open_files": false,
-	"show_tabs": true,
-	"side_bar_visible": true,
-	"side_bar_width": 150.0,
-	"status_bar_visible": true,
-	"template_settings":
-	{
-	}
+  "auto_complete": {
+    "selected_items": [
+      ["f", "function"],
+      ["sc", "section"],
+      ["s", "stroke"],
+      ["node", "node_empty"],
+      ["Tree", "TreeComparator_t"],
+      ["Com", "TreeComparator_t"],
+      ["Binar", "BinarySearchTreeVisitor"],
+      ["Bina", "BinarySearchTreeVisitor"],
+      ["Binary", "BinarySearchTreeVisitor"],
+      ["Walk", "WalkRight"],
+      ["Unit", "UnitState"],
+      ["Uni", "UnitState::WalkUp"],
+      ["c", "component_diff_cmp(…)"],
+      ["Orde", "Ordering::Less"],
+      ["Or", "Ordering::Greater"],
+      ["V", "Vector2"],
+      ["W", "WalkRight"],
+      ["UnitState", "UnitState (use crate::unit::UnitState)"],
+      ["UnitS", "UnitState::WalkRight"],
+      ["in", "into() (as Into)"],
+      ["p", "pathpoints"],
+      ["Ray", "RaylibHandle (use raylib::RaylibHandle)"],
+      ["Tile", "TileMap (use crate::map::TileMap)"],
+      ["co", "collect() (as Iterator)"],
+      ["Grid", "GridLoc (use crate::plane::GridLoc)"],
+      ["Vec", "Vector2 (use raylib::math::Vector2)"],
+      ["d", "filled_diamond(…)"],
+      ["fo", "fog_of_war"],
+      ["cl", "clear_up_fog(…)"],
+      ["map", "map_rect"],
+      ["for", "for_each(…) (as Iterator)"],
+      ["fil", "filter_map(…) (as Iterator)"],
+      ["G", "GridRect"],
+      ["Gr", "GridRect"],
+      ["ca", "cam_pos"],
+      ["max", "max_x"],
+      ["re", "render_size()"],
+      ["draw", "draw_color_tile"],
+      ["B", "BLACK"],
+      ["v", "vr"],
+      ["view", "view_rect(…) (use crate::map::view_rect)"],
+      ["m", "map_rect()"],
+      ["ma", "map_rect()"],
+      ["sa", "saturating_sub(…)"],
+      ["sat", "saturating_sub(…)"],
+      ["r", "rsize"],
+      ["po", "point_v"],
+      ["sca", "scaled_vec(…)"],
+      ["sk", "skip(…) (as Iterator)"],
+      ["draw_circl", "draw_circle_v(…) (as RaylibDraw)"],
+      ["t", "tile_size()"],
+      ["draw_c", "draw_color_tile(…)"],
+      ["dra", "draw_attack_tile(…)"],
+      ["Til", "TileSize (use crate::map::TileSize)"],
+      ["BLA", "BLACK"],
+      ["draw_rectan", "draw_rectangle_lines(…) (as RaylibDraw)"],
+      ["Gri", "GridRect"],
+      ["ren", "render_height"],
+      ["Ve", "Vector2{}"],
+      ["cam", "cam_pos"],
+      ["rend", "render_height"],
+      ["si", "tile_size()"],
+      ["min", "min_y"],
+      ["ra", "radius"],
+      ["lo", "logging (use raylib::logging)"],
+      ["D", "Diamond"],
+      ["filter", "filter_map(…) (as Iterator)"],
+      ["Dia", "DiamondArm::SouthEast"],
+      ["cent", "center_y"],
+      ["ce", "center_x"],
+      ["center", "center_y"],
+      ["Nor", "NorthEast"],
+      ["Diamon", "DiamondArm"],
+      ["Diam", "DiamondArm"],
+      ["Diamo", "DiamondArm"],
+      ["Sou", "SouthWest"],
+      ["Di", "DiamondFlag"],
+      ["sta", "state_flag"],
+      ["Diamond", "DiamondPoint"],
+      ["ne", "next() (as Iterator)"],
+      ["satur", "saturating_sub(…)"],
+      ["No", "NorthWest"],
+      ["N", "NorthWest"],
+      ["Seriali", "SerializeTuple"],
+      ["too", "clippy::too_many_arguments"],
+      ["all", "allow(…)"],
+      ["draw_rec", "draw_rectangle_v(…) (as RaylibDraw)"],
+      ["draw_re", "draw_rectangle_v(…) (as RaylibDraw)"],
+      ["un", "unwrap_or_default()"],
+      ["render", "render_height"],
+      ["tile", "tile_size: &TileSize,"],
+      ["sort", "sort_by(…)"],
+      ["get", "get_mut(…)"],
+      ["de", "deprecated"],
+      ["GridL", "GridLoc"],
+      ["ZER", "ZERO_POINT"],
+      ["allow", "allow(…)"],
+      ["De", "Default"],
+      ["my", "myunit"],
+      ["O", "Ordinate"],
+      ["try", "try_from(…) (as TryFrom)"],
+      ["Re", "Resources"],
+      ["In", "InputState"],
+      ["draw_uni", "draw_unit_attack_tiles"],
+      ["res", "ress: &mut Resources<'_>"],
+      ["spa", "spawn_random_enemy(…)"],
+      ["or", "or_insert_with(…)"],
+      ["uni", "unit_positions"],
+      ["on_hover_", "on_hover_texttooltip"],
+      ["on", "on_hover_texttooltip"],
+      ["on_", "on_hover_texttooltip"],
+      ["on_ho", "on_hover_texttooltip"],
+      ["h", "on_hover_uitooltip"],
+      ["l", "last_unit_mount"],
+      ["T_WIN", "T_WINGS_ICON"],
+      ["draw_tex", "draw_texture_v(…) (as RaylibDraw)"],
+      ["WH", "WHITE"],
+      ["draw_texture", "draw_texture_v(…) (as RaylibDraw)"],
+      ["g", "get(…)"],
+      ["T_S", "T_SWORD_ICON"],
+      ["T_M", "T_MOUNT_ICON"],
+      ["FO", "T_FOOT_ICON"],
+      ["las", "last_unit_gender"],
+      ["IC", "ICON_LIST_WIDTH"],
+      ["a", "allocate_exact_size(…)"],
+      ["mo", "movement"],
+      ["NA", "NATIVE_PXPP (use crate::display::NATIVE_PXPP)"],
+      ["win", "window_fill"],
+    ],
+  },
+  "buffers": [],
+  "build_system": "",
+  "build_system_choices": [
+    [
+      [
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", ""],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Automatic"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Run"],
+        [
+          "Packages/Rust Enhanced/RustEnhanced.sublime-build",
+          "Run (with args)...",
+        ],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Check"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Test"],
+        [
+          "Packages/Rust Enhanced/RustEnhanced.sublime-build",
+          "Test (with args)...",
+        ],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Bench"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Clean"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Document"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Clippy"],
+        ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Script"],
+      ],
+      ["Packages/Rust Enhanced/RustEnhanced.sublime-build", "Run"],
+    ],
+  ],
+  "build_varint": "",
+  "command_palette": {
+    "height": 0.0,
+    "last_filter": "",
+    "selected_items": [
+      ["pack", "Package Control: Install Package"],
+      ["termi", "Terminus: Open Default Shell in Tab (View)"],
+      ["term", "Terminus: Open Default Shell in Tab (View)"],
+      ["termina", "Preferences: Terminus Command Palette"],
+      ["package cont", "Package Control: Install Package"],
+      ["package", "Package Control: Remove Package"],
+      ["termin", "Terminus: Open Default Shell in Tab (View)"],
+      ["new tab", "Terminus: Open Default Shell in Tab (View)"],
+      ["terminal", "Terminus: Open Default Shell in Tab (View)"],
+      ["Terminal", "Terminus: Open Default Shell in Tab (View)"],
+      ["Termainal", "Terminus: Open Default Shell in Panel"],
+      ["pa", "Package Control: Install Package"],
+      ["package control inst", "Package Control: Install Package"],
+      ["install", "Package Control: Install Package"],
+      ["install package", "Install Package Control"],
+      ["inst", "Install Package Control"],
+    ],
+    "width": 0.0,
+  },
+  "console": {
+    "height": 0.0,
+    "history": [],
+  },
+  "distraction_free": {
+    "menu_visible": true,
+    "show_minimap": false,
+    "show_open_files": false,
+    "show_tabs": false,
+    "side_bar_visible": false,
+    "status_bar_visible": false,
+  },
+  "expanded_folders": ["/C/Users/nikhi/OneDrive/Documents/NodeProjects/aiyou"],
+  "file_history": [
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/fow.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/convo.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/campaign.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/unit.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/utils.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/display.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/priort.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/main.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/encounter.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/trigger.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/movement.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/mod.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/battle.rs",
+    "/C/Users/nikhi/OneDrive/Documents/NodeProjects/aiyou/lib/utils.ts",
+    "/?wsl$/Debian/home/user/C2024/DSA/Tree/threaded_binary_tree.h",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test8.html",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test7.html",
+    "/?wsl.localhost/Debian/home/user/C2024/DSA/Tree/binary_search_tree.h",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test5.html",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/test/test6.html",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/mod.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/plane.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/map.rs",
+    "/C/Users/nikhi/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/std/src/collections/hash/map.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/basic.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/prepbattle.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/tileset/overworld.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/data.rs",
+    "/C/Users/nikhi/OneDrive/Documents/Zig/ziglings/exercises/084_async.zig",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/astar.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/ReadMe.md",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/ui.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/oliver.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/sonya.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/combat.rs",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/egui-0.28.1/src/containers/window.rs",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/egui-0.28.1/src/containers/frame.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/campaigns/test/level1.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/.gitignore",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/rustfmt.toml",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/saves/test.sav",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/math.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/campaigns/test.ron",
+    "/C/Users/nikhi/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/CREDITS.md",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/Cargo.toml",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/drawing.rs",
+    "/C/Users/nikhi/.cargo/git/checkouts/egui-raylib-6526e567d30088aa/bffb43f/src/lib.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/drawing.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/rush.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/scenes/textintro.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/fog.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai.rs",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.204/src/de/mod.rs",
+    "/C/Users/nikhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/raylib-5.0.1/src/core/text.rs",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/postapi.ts",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/server.ts",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/client.js",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/index.html",
+    "/C/Users/nikhi/OneDrive/Documents/DenoJS/retrolog/css/style.css",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/carl.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_wind/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/pasteframes.py",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/alphacol.py",
+    "/C/Users/nikhi/OneDrive/Documents/New folder/first-contributions/Contributors.md",
+    "/C/Users/nikhi/OneDrive/Documents/Python/toyscheme/parser.py",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/benedict.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/louhel.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/einar.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/dorothy.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/units/daniel.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/recolour.py",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level2_lake_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai/microprior.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level2_lake_units.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/LICENCE.md",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_bow/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_staff/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_bow/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_axe/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_axe/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_lance/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_sword/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mm_lance/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/mf_sword/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_refresh/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/animanal.py",
+    "/C/Users/nikhi/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.171/src/de/mod.rs",
+    "/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia591_04_21.ck2",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_staff/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_staff/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_bow/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_axe/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_axe/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/spacker.py",
+    "/C/Users/nikhi/.cargo/registry/src/github.com-1ecc6299db9ec823/raylib-3.7.0/src/core/math.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_lance/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_lance/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/uf_sword/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/scripts/mapgen.py",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1_units.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/src/enemyai",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/res/um_sword/anim_data.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/data/maps/level1.json",
+    "/C/Users/nikhi/Tiled Works/FE-style Map mapking/level1.json",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/proelium/maps/test1.ron",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/fib.s",
+    "/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia511_10_29.ck2",
+    "/C/Users/nikhi/OneDrive/Documents/Paradox Interactive/Crusader Kings II/WTWSMS/save games/Chrocus/Alamannia487_05_13.ck2",
+    "/C/Users/nikhi/OneDrive/Documents/testwebview.py",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/winhook/src/apicall.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/helloworld.s",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/test/piout.s",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/exec.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/Cargo.toml",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/opcode.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/build.cmd",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/args.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/dataheader.rs",
+    "/C/Users/nikhi/OneDrive/Documents/RustGround/freya/src/types.rs",
+  ],
+  "find": {
+    "height": 23.2,
+  },
+  "find_in_files": {
+    "height": 119.2,
+    "where_history": [],
+  },
+  "find_state": {
+    "case_sensitive": false,
+    "find_history": [],
+    "highlight": true,
+    "in_selection": false,
+    "preserve_case": false,
+    "regex": false,
+    "replace_history": [],
+    "reverse": false,
+    "scrollbar_highlights": true,
+    "show_context": true,
+    "use_buffer2": true,
+    "use_gitignore": true,
+    "whole_word": false,
+    "wrap": true,
+  },
+  "groups": [
+    {
+      "sheets": [],
+    },
+  ],
+  "incremental_find": {
+    "height": 23.2,
+  },
+  "input": {
+    "height": 44.0,
+  },
+  "layout": {
+    "cells": [[0, 0, 1, 1]],
+    "cols": [0.0, 1.0],
+    "rows": [0.0, 1.0],
+  },
+  "menu_visible": true,
+  "output.LSP Log Panel": {
+    "height": 98.4000015259,
+  },
+  "output.diagnostics": {
+    "height": 98.4000015259,
+  },
+  "output.exec": {
+    "height": 138.0,
+  },
+  "output.find_results": {
+    "height": 0.0,
+  },
+  "output.mdpopups": {
+    "height": 0.0,
+  },
+  "pinned_build_system": "Packages/Rust Enhanced/RustEnhanced.sublime-build",
+  "project": "aiyou.sublime-project",
+  "replace": {
+    "height": 43.2,
+  },
+  "save_all_on_build": true,
+  "select_file": {
+    "height": 0.0,
+    "last_filter": "",
+    "selected_items": [],
+    "width": 0.0,
+  },
+  "select_project": {
+    "height": 500.0,
+    "last_filter": "",
+    "selected_items": [
+      [
+        "",
+        "C:\\Users\\nikhi\\OneDrive\\Documents\\Python\\ml-experiments\\ml-experiments.sublime-project",
+      ],
+    ],
+    "width": 380.0,
+  },
+  "select_symbol": {
+    "height": 0.0,
+    "last_filter": "",
+    "selected_items": [],
+    "width": 0.0,
+  },
+  "selected_group": 0,
+  "settings": {},
+  "show_minimap": true,
+  "show_open_files": false,
+  "show_tabs": true,
+  "side_bar_visible": true,
+  "side_bar_width": 150.0,
+  "status_bar_visible": true,
+  "template_settings": {},
 }
