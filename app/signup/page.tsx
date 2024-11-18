@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { ModeToggle } from "@/components/ui/modetoggle";
 
 async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -53,52 +54,64 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      // Send request to the API
-      const response = await fetch("/api", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          meta: JSON.stringify({ email, password }),
-          email,
-          password,
-          method: "checkUser",
-        }),
-      });
-      const result = await response.json();
-      if (!response.ok || result.error) {
+    if (password !== confirmPassword) {
         console.error(
           "Error during submission:",
-          result.error || "Unknown error",
+          "password does not match the confirmPassword",
         );
         toast({
-          title: result.message,
-          description: result.error || "An error occurred during submission.",
+          title: "Re-enter confirm password",
+          description: "The password and the confirmPassword do not match",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Submission Successful",
-          description: "The data was successfully processed.",
-        });
-        await storeTokenInIndexedDB(result.token);
-        router.push("/main");
       }
-    } catch (err) {
-      console.error("Network or server error:", err);
-      toast({
-        title: "Error",
-        description: "A network or server error occurred.",
-        variant: "destructive",
-      });
-    }
+    else
+      try {
+        // Send request to the API
+        const response = await fetch("/api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            meta: JSON.stringify({ email:email, password:password }),
+            method: "checkUser",
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok || result.error) {
+          console.error(
+            "Error during submission:",
+            result.error || "Unknown error",
+          );
+          toast({
+            title: result.message,
+            description: result.error || "An error occurred during submission.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Submission Successful",
+            description: "The data was successfully processed. You're now logged in!",
+          });
+          await storeTokenInIndexedDB(result.token);
+          router.push("/main");
+        }
+      } catch (err) {
+        console.error("Network or server error:", err);
+        toast({
+          title: "Error",
+          description: "A network or server error occurred.",
+          variant: "destructive",
+        });
+      }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
+      <div className="absolute top-4 right-4">
+        <ModeToggle className="space-x-4 space-y-6" />
+      </div>
       <header className="flex flex-col items-center space-y-2 mb-8">
         <div className="bg-black text-white p-2 rounded">
           <Image

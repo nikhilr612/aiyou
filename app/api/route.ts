@@ -3,16 +3,14 @@ import { generateTextEmbedding } from "../../lib/model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const retriever_limit = 5;
-
+const ALLOWED_TIME = 3600; //In seconds
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const query_text: string = body.text;
-  const api_method: string = body.method;
-  const meta: string = body.meta;
-  const email: string = body.email;
-  const password: string = body.password;
-  const token: string = body.token;
+  const query_text: string  							 = body.text;
+  const api_method: string 								 = body.method;
+  const meta: string 											 = body.meta;
+  const meta_object:{ [key: string]: any } = JSON.parse(meta);
 
   try {
     switch (api_method) {
@@ -38,7 +36,7 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify({ error: false }));
       case "checkUser":
         try {
-          if (!meta || !email || !password) {
+          if (!meta_object.email || !meta_object.password) {
             return new Response(
               JSON.stringify({
                 error: true,
@@ -49,7 +47,7 @@ export async function POST(req: Request) {
           }
 
           // Check if the user exists or validate user data using checkUser function
-          const back_res = await checkUser(meta, email, password);
+          const back_res = await checkUser(meta_object.email,meta_object.password);
 
           if (back_res == "exists") {
             // If the function returns an error message, respond with it
@@ -65,7 +63,7 @@ export async function POST(req: Request) {
                 error: true,
                 message: "Error with user creation",
               }),
-              { status: 402 },
+              { status: 400 },
             );
           }
           // If no issues, return a successful response
@@ -84,12 +82,12 @@ export async function POST(req: Request) {
               error: true,
               message: "Internal server error during user check",
             }),
-            { status: 505 },
+            { status: 500 },
           );
         }
       case "authenticateUser":
         try {
-          if (!email || !password) {
+          if (!meta_object.email || !meta_object.password) {
             return new Response(
               JSON.stringify({
                 error: true,
@@ -99,10 +97,10 @@ export async function POST(req: Request) {
             );
           }
 
-          console.debug("Email:", email, "Password:", password);
+          console.debug("Email:", meta_object.email, "Password:", meta_object.password);
 
           // Call the authenticateUser function
-          const back_res = await authenticateUser(email, password);
+          const back_res = await authenticateUser(meta_object.email, meta_object.password);
 
           if (back_res.error) {
             // If the function returns an error message, respond with it
@@ -128,12 +126,12 @@ export async function POST(req: Request) {
               error: true,
               message: "Internal server error during user authentication",
             }),
-            { status: 505 },
+            { status: 500 },
           );
         }
       case "validateUser":
         try {
-          if (!token) {
+          if (!meta_object.token) {
             return new Response(
               JSON.stringify({
                 error: true,
@@ -143,15 +141,15 @@ export async function POST(req: Request) {
             );
           }
 
-          console.debug("Password:", token);
+          console.debug("Password:", meta_object.token);
 
           // Call the authenticateUser function
-          const back_res = await validateUserToken(token);
+          const back_res = await validateUserToken(meta_object.token);
 
           if (back_res.error) {
             return new Response(
               JSON.stringify({ error: true, message: back_res.error }),
-              { status: 402 },
+              { status: 400 },
             );
           }
 
@@ -160,6 +158,7 @@ export async function POST(req: Request) {
             JSON.stringify({
               error: false,
               message: "User authenticated successfully",
+              token:meta_object.token
             }),
             { status: 200 },
           );
@@ -235,9 +234,9 @@ async function insertTextIntoStore(
 const SECRET_KEY = process.env.SECRET_KEY;
 
 async function checkUser(
-  meta_object: Record<string, any> = {},
   email: string,
   password: string,
+  meta_object?: { [key: string]: any },
 ): Promise<string | null> {
   try {
     // Check if the email already exists in the database
@@ -250,7 +249,7 @@ async function checkUser(
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate a JWT token
-    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: `${ALLOWED_TIME}s` });
     // Create a new user
     const newUser = new User({
       email: email,
@@ -291,7 +290,7 @@ async function authenticateUser(
     email == process.env.DEV_AUTH_UNAME &&
     password == process.env.DEV_AUTH_PASS
   ) {
-    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "10h" });
+    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: `${ALLOWED_TIME}s` });
     DEV_AUTH_TOKEN = token;
     return { token: DEV_AUTH_TOKEN, error: null };
   }
@@ -314,7 +313,7 @@ async function authenticateUser(
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: `${ALLOWED_TIME}s` });
     existingUser.token = token;
     await existingUser.save();
     return { token, error: null };
@@ -331,12 +330,28 @@ async function validateUserToken(
   token: string,
 ): Promise<{ valid: boolean; error: string | null }> {
   try {
+  	const decoded = jwt.decode(token) as jwt.JwtPayload | null;
+
+    if (!decoded || !decoded.exp) {
+      return null; // Invalid token format or missing expiration
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    const exp = decoded.exp; 
     const existingUser = await User.findOne({ token: token });
-    if (!existingUser) {
+    if ( !existingUser || exp < currentTime) {
       return { valid: false, error: "Invalid token." };
     }
-    jwt.decode(token);
-    return { valid: true, error: null };
+    if(exp - currentTime < ALLOWED_TIME / 2){
+    	token = jwt.sign(
+        { email: existingUser.email }, // Assume the record with token has a username(which in our case is email)
+        	SECRET_KEY, // Use the secret key from environment
+        { expiresIn: `${ALLOWED_TIME}s` } // Reset expiration time
+      );
+    }
+    existingUser.token = token;
+    existingUser.save();
+    return { valid: true, error: null , token:token};
   } catch (err) {
     // Handle any errors that occur during the database query
     console.error("Error during token validation:", err);

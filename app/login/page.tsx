@@ -81,8 +81,7 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
-          password,
+          meta: JSON.stringify({ email:email, password:password }),
           method: "authenticateUser", // Specify the login method
         }),
       });
@@ -118,7 +117,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
-      <ModeToggle /> {/*Move this somewhere resonable*/}
+      <div className="absolute top-4 right-4">
+        <ModeToggle className="space-x-4 space-y-6" />
+      </div>
       <header className="flex flex-col items-center space-y-2 mb-8">
         <div className="bg-black text-white p-2 rounded">
           <Image
