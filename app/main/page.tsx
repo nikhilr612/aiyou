@@ -63,97 +63,97 @@ const USER_AVATAR_PLACEHOLDER: string = "/images/user-avatar.png";
 const initialEndpoints: Endpoint[] = [
   { name: "ollama-local", target: "http://localhost:11434" },
 ];
+const getTokenFromIndexedDB = async (): Promise<string | null> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      // Create an object store for tokens if it doesn't already exist
+      if (!db.objectStoreNames.contains("tokens")) {
+        db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
+      }
+    };
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction(["tokens"], "readonly");
+      const store = transaction.objectStore("tokens");
+
+      const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
+
+      tokenRequest.onsuccess = () => {
+        resolve(tokenRequest.result ? tokenRequest.result.token : null);
+      };
+
+      tokenRequest.onerror = () => {
+        reject("Error retrieving token from IndexedDB");
+      };
+    };
+
+    request.onerror = () => {
+      reject("Error opening IndexedDB");
+    };
+  });
+};
+
+const storeTokenInIndexedDB = async (token: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("UserDB", 1);
+
+    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains("tokens")) {
+        db.createObjectStore("tokens", { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (event: Event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      const transaction = db.transaction("tokens", "readwrite");
+      const store = transaction.objectStore("tokens");
+
+      // Check if a token already exists
+      const getRequest = store.get("authToken");
+
+      getRequest.onsuccess = () => {
+        if (getRequest.result) {
+          console.debug("Token already exists. Replacing with new token.");
+        } else {
+          console.debug("No token found. Storing new token.");
+        }
+
+        // Replace or insert the token
+        store.put({ id: "authToken", token });
+
+        transaction.oncomplete = () => {
+          console.debug("Token stored successfully in IndexedDB");
+          resolve();
+        };
+
+        transaction.onerror = () => {
+          console.error("Error storing token in IndexedDB");
+          reject(transaction.error);
+        };
+      };
+
+      getRequest.onerror = () => {
+        console.error("Error checking existing token in IndexedDB");
+        reject(getRequest.error);
+      };
+    };
+
+    request.onerror = () => {
+      console.error("Error opening IndexedDB");
+      reject(request.error);
+    };
+  });
+};
 
 export default function MainPage() {
   // For Showing toasts.
   const { toast } = useToast();
   const router = useRouter();
-
-  const getTokenFromIndexedDB = async (): Promise<string | null> => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
-
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        // Create an object store for tokens if it doesn't already exist
-        if (!db.objectStoreNames.contains("tokens")) {
-          db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
-        }
-      };
-
-      request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(["tokens"], "readonly");
-        const store = transaction.objectStore("tokens");
-
-        const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
-
-        tokenRequest.onsuccess = () => {
-          resolve(tokenRequest.result ? tokenRequest.result.token : null);
-        };
-
-        tokenRequest.onerror = () => {
-          reject("Error retrieving token from IndexedDB");
-        };
-      };
-
-      request.onerror = () => {
-        reject("Error opening IndexedDB");
-      };
-    });
-  };
-  const storeTokenInIndexedDB = async(token: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open("UserDB", 1);
-
-      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains("tokens")) {
-          db.createObjectStore("tokens", { keyPath: "id" });
-        }
-      };
-
-      request.onsuccess = (event: Event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        const transaction = db.transaction("tokens", "readwrite");
-        const store = transaction.objectStore("tokens");
-
-        // Check if a token already exists
-        const getRequest = store.get("authToken");
-
-        getRequest.onsuccess = () => {
-          if (getRequest.result) {
-            console.debug("Token already exists. Replacing with new token.");
-          } else {
-            console.debug("No token found. Storing new token.");
-          }
-
-          // Replace or insert the token
-          store.put({ id: "authToken", token });
-
-          transaction.oncomplete = () => {
-            console.debug("Token stored successfully in IndexedDB");
-            resolve();
-          };
-
-          transaction.onerror = () => {
-            console.error("Error storing token in IndexedDB");
-            reject(transaction.error);
-          };
-        };
-
-        getRequest.onerror = () => {
-          console.error("Error checking existing token in IndexedDB");
-          reject(getRequest.error);
-        };
-      };
-
-      request.onerror = () => {
-        console.error("Error opening IndexedDB");
-        reject(request.error);
-      };
-    });
-  }
   const validateUserToken = async () => {
     //shows login toast
     try {
@@ -165,10 +165,9 @@ export default function MainPage() {
           description: "No token found. Please log in again.",
           variant: "destructive",
         });
-        router.push("/fuck-you");
+        router.push("/fcku");
         return;
       }
-      /// TODO: Replicate expiry check in [`route.ts`] as well.
       const response = await fetch("/api", {
         method: "POST",
         headers: {
@@ -176,7 +175,7 @@ export default function MainPage() {
         },
         body: JSON.stringify({
           method: "validateUser",
-          meta: JSON.stringify({ token:token}),
+          meta: JSON.stringify({ token: token }),
         }),
       });
 
@@ -191,14 +190,14 @@ export default function MainPage() {
           description: "Your session has expired. Please log in again.",
           variant: "destructive",
         });
-        router.push("/fuck-you");
+        router.push("/fcku");
       } else {
         toast({
           title: "Error",
           description: result.message || "An error occurred.",
           variant: "destructive",
         });
-        router.push("/fuck-you");
+        router.push("/fcku");
       }
     } catch (err) {
       console.error("Error during token validation:", err);
@@ -207,7 +206,7 @@ export default function MainPage() {
         description: "An error occurred during the validation process.",
         variant: "destructive",
       });
-      router.push("/fuck-you");
+      router.push("/fcku");
     }
   };
 
@@ -264,38 +263,6 @@ export default function MainPage() {
   }, [messages]);
 
   const handleSendMessage = async (text: string) => {
-    const token = await getTokenFromIndexedDB();
-    console.debug(token);
-    const response = await fetch('/api', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        method: 'validateUser',
-        meta: JSON.stringify({ token:token }),
-      }),
-    });
-
-    const result = await response.json();
-    if (response.ok && !result.error) {
-      await storeTokenInIndexedDB(result.token);
-    } else if (result.error === "Invalid token.") {
-      toast({
-        title: "Invalid Token",
-        description: "Your session has expired. Please log in again.",
-        variant: "destructive",
-      });
-      router.push('/login');
-      }
-      else {
-        toast({
-          title: "Error",
-          description: result.error || "An error occurred.",
-          variant: "destructive",
-        });
-        router.push('/fuck-you');
-      }
     const newMessage: Message = { content: text, isUser: true };
     setMessages((msgs) => {
       return {
@@ -303,8 +270,8 @@ export default function MainPage() {
         [currentThread.id]: [...msgs[currentThread.id], newMessage],
       };
     });
-
     try {
+      validateUserToken();
       const response = await agentic_call(
         selectedEndpoint,
         messages[currentThread.id],
@@ -609,7 +576,14 @@ function IngestItem() {
     input.click();
   };
 
-  return <DropdownMenuItem onClick={handleClick} className="hover:bg-secondary cursor-pointer">Ingest</DropdownMenuItem>;
+  return (
+    <DropdownMenuItem
+      onClick={handleClick}
+      className="hover:bg-secondary cursor-pointer"
+    >
+      Ingest
+    </DropdownMenuItem>
+  );
 }
 
 function TopBar({
@@ -637,9 +611,12 @@ function TopBar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <NewEndpointDialog addEndpoint={addEndpoint} className="hover:bg-secondary"/>
+            <NewEndpointDialog
+              addEndpoint={addEndpoint}
+              className="hover:bg-secondary"
+            />
             <IngestItem />
-            <DropdownMenuItem >
+            <DropdownMenuItem>
               <Link href="/help">Help</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

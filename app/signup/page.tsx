@@ -55,17 +55,16 @@ export default function SignupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-        console.error(
-          "Error during submission:",
-          "password does not match the confirmPassword",
-        );
-        toast({
-          title: "Re-enter confirm password",
-          description: "The password and the confirmPassword do not match",
-          variant: "destructive",
-        });
-      }
-    else
+      console.error(
+        "Error during submission:",
+        "password does not match the confirmPassword",
+      );
+      toast({
+        title: "Re-enter confirm password",
+        description: "The password and the confirmPassword do not match",
+        variant: "destructive",
+      });
+    } else
       try {
         // Send request to the API
         const response = await fetch("/api", {
@@ -74,10 +73,11 @@ export default function SignupPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            meta: JSON.stringify({ email:email, password:password }),
-            method: "checkUser",
+            meta: JSON.stringify({ email: email, password: password }),
+            method: "createUser",
           }),
         });
+        console.log(response);
         const result = await response.json();
         if (!response.ok || result.error) {
           console.error(
@@ -92,7 +92,8 @@ export default function SignupPage() {
         } else {
           toast({
             title: "Submission Successful",
-            description: "The data was successfully processed. You're now logged in!",
+            description:
+              "The data was successfully processed. You're now logged in!",
           });
           await storeTokenInIndexedDB(result.token);
           router.push("/main");
