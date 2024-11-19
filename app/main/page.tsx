@@ -395,7 +395,7 @@ function SidePanel({
   );
 
   return (
-    <aside className="w-64 p-4 border-r hidden lg:block h-full">
+    <aside className="w-64 mt-2 mb-2 ml-2 p-2 border-r hidden lg:block h-full">
       <div className="flex items-center mb-4">
         <Input
           placeholder="Search or Create"
@@ -412,7 +412,7 @@ function SidePanel({
           <Card
             key={thread.id}
             onClick={() => onSelectThread(thread)}
-            className="cursor-pointer p-2 rounded bg-secondary flex items-center mb-2"
+            className="cursor-pointer p-2 rounded hover:bg-secondary flex items-center mb-2 mr-3"
           >
             <Avatar className="mr-3">
               <AvatarImage src={THREAD_IMAGE_PLACEHOLDER} alt={thread.name} />
@@ -460,6 +460,7 @@ function EndpointSelect({
                 <CommandItem
                   key={endpoint.target}
                   value={endpoint.target}
+                  className="hover:bg-secondary cursor-pointer"
                   onSelect={(currentValue: string) => {
                     const endpoint = endpoints.find(
                       (ep) => ep.target === currentValue,
@@ -608,7 +609,7 @@ function IngestItem() {
     input.click();
   };
 
-  return <DropdownMenuItem onClick={handleClick}>Ingest</DropdownMenuItem>;
+  return <DropdownMenuItem onClick={handleClick} className="hover:bg-secondary cursor-pointer">Ingest</DropdownMenuItem>;
 }
 
 function TopBar({
@@ -636,9 +637,9 @@ function TopBar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <NewEndpointDialog addEndpoint={addEndpoint} />
+            <NewEndpointDialog addEndpoint={addEndpoint} className="hover:bg-secondary"/>
             <IngestItem />
-            <DropdownMenuItem>
+            <DropdownMenuItem >
               <Link href="/help">Help</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
