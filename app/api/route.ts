@@ -103,10 +103,17 @@ export async function POST(req: Request) {
 				const token = await authenticateUser(meta_object.credentials);
 				return new Response(JSON.stringify({ error: false, token: token }));
 
+			case "verify":
+				/// Verify that the token has user permissions.
+				/// Otherwise
+				if (!permissions.allow_user_calls)
+					return new Response(JSON.stringify({ error: true, message: "Not a user.." }), { status: 449 });
+				return new Response(JSON.stringify({ error: false }));
+
 			default:
 				return new Response(
 					JSON.stringify({ error: true, message: "Invalid API method" }),
-					{ status: 500 },
+					{ status: 400 },
 				);
 		}
 	} catch (error) {
@@ -121,7 +128,7 @@ export async function POST(req: Request) {
 			`An error occurred while handling method '${api_method}'.\n${errorMessage}\nERR: ${error}\n`,
 		);
 
-		return new Response(JSON.stringify({ error: true, message: errorMessage }));
+		return new Response(JSON.stringify({ error: true, message: errorMessage }), { status: 500, statusText: "Server error." });
 	}
 }
 

@@ -52,6 +52,7 @@ import materialDark from "react-syntax-highlighter/dist/esm/styles/prism/materia
 import { useRouter } from "next/navigation";
 //import {validateUserToken} from './validateUser'
 import jwt from "jsonwebtoken";
+import { NextRouter } from "next/router";
 interface Thread {
   id: number;
   name: string;
@@ -64,11 +65,11 @@ const initialEndpoints: Endpoint[] = [
   { name: "ollama-local", target: "http://localhost:11434" },
 ];
 
-const getTokenFromIndexedDB = async (): Promise<string | null> => {
+async function getTokenFromIndexedDB(): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = (event: Event) => {
       const db = event.target.result;
       // Create an object store for tokens if it doesn't already exist
       if (!db.objectStoreNames.contains("tokens")) {
@@ -76,7 +77,7 @@ const getTokenFromIndexedDB = async (): Promise<string | null> => {
       }
     };
 
-    request.onsuccess = (event) => {
+    request.onsuccess = (event: Event) => {
       const db = event.target.result;
       const transaction = db.transaction(["tokens"], "readonly");
       const store = transaction.objectStore("tokens");
@@ -98,7 +99,7 @@ const getTokenFromIndexedDB = async (): Promise<string | null> => {
   });
 };
 
-const storeTokenInIndexedDB = async (token: string): Promise<void> => {
+async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("UserDB", 1);
 
@@ -151,66 +152,70 @@ const storeTokenInIndexedDB = async (token: string): Promise<void> => {
   });
 };
 
+// TODO: Add correct type here.
+async function validateUserToken(toast: any, router: NextRouter){
+  //shows login toast
+  try {
+    // Step 1: Retrieve token from IndexedDB
+    const token = await getTokenFromIndexedDB();
+    if (!token) {
+      toast({
+        title: "Error",
+        description: "No token found. Please log in again.",
+        variant: "destructive",
+      });
+      router.push("/fcku");
+      return;
+    }
+    const response = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        method: "verify",
+        meta: JSON.stringify({ token: token }),
+      }),
+    });
+
+    const result = await response.json();
+
+  // TODO: CHECK LOGIC HERE....
+
+    if (response.ok && !result.error) {
+      await storeTokenInIndexedDB(result.token);
+    } else if (result.error === "Invalid token.") {
+      toast({
+        title: "Invalid Token",
+        description: "Your session has expired. Please log in again.",
+        variant: "destructive",
+      });
+      router.push("/fcku");
+    } else {
+      toast({
+        title: "Error",
+        description: result.message || "An error occurred.",
+        variant: "destructive",
+      });
+      router.push("/fcku");
+    }
+  } catch (err) {
+    console.error("Error during token validation:", err);
+    toast({
+      title: "Error",
+      description: "An error occurred during the validation process.",
+      variant: "destructive",
+    });
+    router.push("/fcku");
+  }
+};
+
 
 export default function MainPage() {
   // For Showing toasts.
   const { toast } = useToast();
   const router = useRouter();
-  const validateUserToken = async () => {
-    //shows login toast
-    try {
-      // Step 1: Retrieve token from IndexedDB
-      const token = await getTokenFromIndexedDB();
-      if (!token) {
-        toast({
-          title: "Error",
-          description: "No token found. Please log in again.",
-          variant: "destructive",
-        });
-        router.push("/fcku");
-        return;
-      }
-      const response = await fetch("/api", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          method: "validateUser",
-          meta: JSON.stringify({ token: token }),
-        }),
-      });
-
-      const result = await response.json();
-
-      // Step 3: Handle response
-      if (response.ok && !result.error) {
-        await storeTokenInIndexedDB(result.token);
-      } else if (result.error === "Invalid token.") {
-        toast({
-          title: "Invalid Token",
-          description: "Your session has expired. Please log in again.",
-          variant: "destructive",
-        });
-        router.push("/fcku");
-      } else {
-        toast({
-          title: "Error",
-          description: result.message || "An error occurred.",
-          variant: "destructive",
-        });
-        router.push("/fcku");
-      }
-    } catch (err) {
-      console.error("Error during token validation:", err);
-      toast({
-        title: "Error",
-        description: "An error occurred during the validation process.",
-        variant: "destructive",
-      });
-      router.push("/fcku");
-    }
-  };
+  
 
   const [threads, setThreads] = useState<Thread[]>([{ id: 1, name: "Thread" }]);
 
@@ -232,7 +237,7 @@ export default function MainPage() {
   );
 
   useEffect(() => {
-    validateUserToken();
+    validateUserToken(toast, router);
     const storedThreads = localStorage.getItem("AIYOU_threads");
     setThreads(
       storedThreads ? JSON.parse(storedThreads) : [{ id: 1, name: "Thread" }],
