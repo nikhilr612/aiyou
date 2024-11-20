@@ -20,11 +20,12 @@ interface ApiMetaObject {
 
 /// TODO(Low Priority): Store information about the user ingesting data in to vector store.
 interface VectorMetaData {
-	chunk_author: string
+	chunk_author: string;
 }
 
 function validateMetaObject(t: ApiMetaObject): boolean {
-	if (t.credentials) return Boolean(t.credentials.email && t.credentials.password);
+	if (t.credentials)
+		return Boolean(t.credentials.email && t.credentials.password);
 	else return Boolean(t.token);
 }
 
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
 	const api_method: string = body.method;
 	const meta: string = body.meta;
 	let meta_object: ApiMetaObject = JSON.parse(meta);
+	console.debug("meta object", meta_object);
 
 	if (!validateMetaObject(meta_object)) {
 		return new Response(
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
 
 	try {
 		const permissions = await validateUserToken(meta_object.token);
-		
+
 		// Pass this to all reponses.
 		const refreshed_token = undefined;
 
@@ -59,47 +61,98 @@ export async function POST(req: Request) {
 
 		switch (api_method) {
 			case "ingest":
-				if(!permissions.allow_user_calls) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." });
+				if (!permissions.allow_user_calls)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Insufficient permissions.",
+						}),
+						{ status: 401, statusText: "Denied." },
+					);
 
 				// Add text embeddings into the vector store.
 				// Here 'meta' is some information about the source of the text being ingested.
-				await insertTextIntoStore(query_text, meta_object.chunk_source || "User uploaded context");
-				return new Response(JSON.stringify({ error: false }));
+				await insertTextIntoStore(
+					query_text,
+					meta_object.chunk_source || "User uploaded context",
+				);
+				return new Response(
+					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+				);
 
 			case "retrieve":
-				if(!permissions.allow_user_calls) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." });
+				if (!permissions.allow_user_calls)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Insufficient permissions.",
+						}),
+						{ status: 401, statusText: "Denied." },
+					);
 
 				// Retrieve documents [array of strings ranked according to similarity score]. Do not return documents that don't belong to the user.
 				const relevant_documents = await queryVectorStore(query_text);
 				return new Response(
-					JSON.stringify({ error: false, documents: relevant_documents }),
+					JSON.stringify({
+						error: false,
+						documents: relevant_documents,
+						refresh: permissions.auto_refresh,
+					}),
 				);
 
 			case "index":
-				if(!permissions.allow_index) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." })
+				if (!permissions.allow_index)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Insufficient permissions.",
+						}),
+						{ status: 401, statusText: "Denied." },
+					);
 
 				// Re-create the vector search index on MongoDB.
 				// Log user request to re-create vector search index.
 				// Here 'meta' is the cause for request to re-create vector search index.
 				// Reject is user is 'anon'.
 				await createVectorSearchIndex();
-				return new Response(JSON.stringify({ error: false }));
+				return new Response(
+					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+				);
 
 			case "createUser":
-				if(!permissions.allow_create) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." })
+				if (!permissions.allow_create)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Insufficient permissions.",
+						}),
+						{ status: 401, statusText: "Denied." },
+					);
 
 				// Create a user from the provided credentials.
 				// Reject if credentials are missing.
 				if (!meta_object.credentials)
-					return new Response(JSON.stringify({ error: true, message: "Invalid user creation request. Missing credientials." }), { status: 400 });
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Invalid user creation request. Missing credientials.",
+						}),
+						{ status: 400 },
+					);
 				const new_token = await createUser(meta_object.credentials);
 				return new Response(JSON.stringify({ error: false, token: new_token }));
 
 			case "authenticateUser":
 				/// Authenticate user. Always available.
 				/// Reject if credentials are misisng.
-				if (!meta_object.credentials) 
-					return new Response(JSON.stringify({ error: true, message: "Invalid authentication request. Missing credentials." }), { status: 400 });
+				if (!meta_object.credentials)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Invalid authentication request. Missing credentials.",
+						}),
+						{ status: 400 },
+					);
 				const token = await authenticateUser(meta_object.credentials);
 				return new Response(JSON.stringify({ error: false, token: token }));
 
@@ -107,8 +160,32 @@ export async function POST(req: Request) {
 				/// Verify that the token has user permissions.
 				/// Otherwise
 				if (!permissions.allow_user_calls)
-					return new Response(JSON.stringify({ error: true, message: "Not a user.." }), { status: 449 });
-				return new Response(JSON.stringify({ error: false }));
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Not a user..",
+						}),
+						{ status: 449 },
+					);
+				return new Response(
+					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+				);
+
+			case "refresh":
+				//check if the token has auto_refresh enabled
+				if (!permissions.auto_refresh)
+					return new Response(
+						JSON.stringify({
+							error: true,
+							message: "Bad Request",
+						}),
+						{ status: 400 },
+					);
+				const refreshed_token = await refreshToken(meta_object.token);
+				return new Response(
+					JSON.stringify({ error: false, token: refreshed_token }),
+					{ status: 200 },
+				);
 
 			default:
 				return new Response(
@@ -128,7 +205,10 @@ export async function POST(req: Request) {
 			`An error occurred while handling method '${api_method}'.\n${errorMessage}\nERR: ${error}\n`,
 		);
 
-		return new Response(JSON.stringify({ error: true, message: errorMessage }), { status: 500, statusText: "Server error." });
+		return new Response(
+			JSON.stringify({ error: true, message: errorMessage }),
+			{ status: 500, statusText: "Server error." },
+		);
 	}
 }
 
@@ -168,9 +248,7 @@ async function insertTextIntoStore(
 	await vecstore.add([{ vector: embeddings.tolist(), text: text, meta: meta }]);
 }
 
-async function createUser(
-	new_credentials: AuthCredentials,
-): Promise<string> {
+async function createUser(new_credentials: AuthCredentials): Promise<string> {
 	// Check if the email already exists in the database
 	const existingUser = await User.findOne({ email: new_credentials.email });
 	if (existingUser) throw new Error("User already exists!");
@@ -199,7 +277,6 @@ async function createUser(
 }
 
 async function authenticateUser(credentials: AuthCredentials): Promise<string> {
-
 	// -------------------DEV-AUTH-STUFF----------------
 	if (
 		process.env.ALLOW_DEV_AUTH &&
@@ -236,29 +313,32 @@ async function authenticateUser(credentials: AuthCredentials): Promise<string> {
 }
 
 interface ApiPermissions {
-	allow_index: boolean,
-	allow_user_calls: boolean,
-	allow_create: boolean,
-	auto_refresh: boolean
+	allow_index: boolean;
+	allow_user_calls: boolean;
+	allow_create: boolean;
+	auto_refresh: boolean;
 }
 
 const NULL_TOKEN = "NULL_TOKEN";
-const NULL_PERMISSIONS: ApiPermissions = { allow_create: true, allow_index: false, allow_user_calls: false, auto_refresh: false };
+const NULL_PERMISSIONS: ApiPermissions = {
+	allow_create: true,
+	allow_index: false,
+	allow_user_calls: false,
+	auto_refresh: false,
+};
 const DEV_PERMISSIONS: ApiPermissions = {
 	allow_create: true,
 	allow_index: true,
 	allow_user_calls: true,
-	auto_refresh: false
+	auto_refresh: false,
 };
 
 /**
  * Check if the provided token is valid, and return the permissions awarded.
  * It is noteworthy, that expired tokens are not necessarily deemed invalid.
  * */
-async function validateUserToken(
-	token: string,
-): Promise<ApiPermissions> {
-	if (token == NULL_TOKEN) return NULL_PERMISSIONS; 
+async function validateUserToken(token: string): Promise<ApiPermissions> {
+	if (token == NULL_TOKEN) return NULL_PERMISSIONS;
 
 	const decoded = jwt.decode(token) as jwt.JwtPayload | null;
 	const meta_object = jwt.verify(token, process.env.SECRET_KEY);
@@ -278,12 +358,21 @@ async function validateUserToken(
 	const currentTime = Math.floor(Date.now() / 1000);
 	const exp = decoded.exp;
 
-	if (currentTime > exp) throw new Error("Token expired."); 
-	
+	if (currentTime > exp) throw new Error("Token expired.");
+
 	return {
 		allow_create: false,
 		allow_index: false,
 		allow_user_calls: true,
-		auto_refresh: Boolean((currentTime - exp) < (ALLOWED_TIME / 2))
+		auto_refresh: Boolean(currentTime - exp < ALLOWED_TIME / 2),
 	};
+}
+
+async function refreshToken(token: string): string {
+	const existingUser = await User.findOne({ token: token });
+	existingUser.token = jwt.sign({ email: existingUser.email }, SECRET_KEY, {
+		expiresIn: `${ALLOWED_TIME}s`,
+	});
+	existingUser.save();
+	return existingUser.token;
 }
