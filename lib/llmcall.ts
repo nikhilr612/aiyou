@@ -114,6 +114,7 @@ export async function agentic_call(
   history: Message[],
   query: string,
   notify: NotificationFn = default_notification_fn,
+  retriever_access_token: string
 ): Promise<string> {
   const response1 = await llmcall(endpoint, history, query, "user", PROMPT1);
   console.log("CRAG-Response1: ", response1.message.content);
@@ -169,7 +170,9 @@ export async function agentic_call(
     body: JSON.stringify({
       text: response1.message.content,
       method: "retrieve",
-      meta: "{}", // TODO: Add JSON for user-related stuff here.
+      meta: JSON.stringify({
+        token: retriever_access_token
+      }), // TODO: Add JSON for user-related stuff here.
     }),
   });
 

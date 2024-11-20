@@ -81,7 +81,9 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          meta: JSON.stringify({ email: email, password: password }),
+          meta: JSON.stringify({
+            credentials: { email: email, password: password }
+          }),
           method: "authenticateUser", // Specify the login method
         }),
       });

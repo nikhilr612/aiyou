@@ -63,6 +63,7 @@ const USER_AVATAR_PLACEHOLDER: string = "/images/user-avatar.png";
 const initialEndpoints: Endpoint[] = [
   { name: "ollama-local", target: "http://localhost:11434" },
 ];
+
 const getTokenFromIndexedDB = async (): Promise<string | null> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
@@ -149,6 +150,7 @@ const storeTokenInIndexedDB = async (token: string): Promise<void> => {
     };
   });
 };
+
 
 export default function MainPage() {
   // For Showing toasts.
@@ -536,14 +538,18 @@ function IngestItem() {
           USER_RAG_CHUNK_SIZE,
           TEXT_DELIMS,
         );
-        const promises = chunks.map((chunk) =>
+        // TODO: Check this
+        const promises = chunks.map(async (chunk) =>
           fetch("/api", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               text: chunk,
               method: "ingest",
-              meta: `{ "source": "${file.name}" }`, // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
+              meta: JSON.stringify({
+                token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
+                chunk_source: file.name
+              }), // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
             }),
           }).then((r) => r.json()),
         );

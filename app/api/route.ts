@@ -15,8 +15,10 @@ interface AuthCredentials {
 interface ApiMetaObject {
 	credentials?: AuthCredentials;
 	token?: string;
+	chunk_source?: string;
 }
 
+/// TODO(Low Priority): Store information about the user ingesting data in to vector store.
 interface VectorMetaData {
 	chunk_author: string
 }
@@ -47,20 +49,26 @@ export async function POST(req: Request) {
 		const permissions = await validateUserToken(meta_object.token);
 		
 		// Pass this to all reponses.
-		const refresh_token = undefined;
+		const refreshed_token = undefined;
 
 		if (permissions.auto_refresh) {
 			// Token refresh logic here...
+			// TODO: If this request has been made *within* some fraction of `ALLOWED_TIME` since *generation* of token- create a new token for `ALLOWED_TIME` from now.
+			// Consider making this window ~15 mins.
 		}
 
 		switch (api_method) {
 			case "ingest":
+				if(!permissions.allow_user_calls) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." });
+
 				// Add text embeddings into the vector store.
 				// Here 'meta' is some information about the source of the text being ingested.
-				await insertTextIntoStore(query_text, meta);
+				await insertTextIntoStore(query_text, meta_object.chunk_source || "User uploaded context");
 				return new Response(JSON.stringify({ error: false }));
 
 			case "retrieve":
+				if(!permissions.allow_user_calls) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." });
+
 				// Retrieve documents [array of strings ranked according to similarity score]. Do not return documents that don't belong to the user.
 				const relevant_documents = await queryVectorStore(query_text);
 				return new Response(
@@ -68,6 +76,8 @@ export async function POST(req: Request) {
 				);
 
 			case "index":
+				if(!permissions.allow_index) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." })
+
 				// Re-create the vector search index on MongoDB.
 				// Log user request to re-create vector search index.
 				// Here 'meta' is the cause for request to re-create vector search index.
@@ -76,6 +86,8 @@ export async function POST(req: Request) {
 				return new Response(JSON.stringify({ error: false }));
 
 			case "createUser":
+				if(!permissions.allow_create) return new Response(JSON.stringify({ error: true, message: "Insufficient permissions." }), { status: 401, statusText: "Denied." })
+
 				// Create a user from the provided credentials.
 				// Reject if credentials are missing.
 				if (!meta_object.credentials)
@@ -84,7 +96,7 @@ export async function POST(req: Request) {
 				return new Response(JSON.stringify({ error: false, token: new_token }));
 
 			case "authenticateUser":
-				/// Authenticate user.
+				/// Authenticate user. Always available.
 				/// Reject if credentials are misisng.
 				if (!meta_object.credentials) 
 					return new Response(JSON.stringify({ error: true, message: "Invalid authentication request. Missing credentials." }), { status: 400 });
