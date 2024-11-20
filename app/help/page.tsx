@@ -69,10 +69,6 @@ const HelpPage: React.FC = () => {
             {[
               { question: "How do I get started?", answer: "Follow our setup guide in the documentation." },
               {
-                question: "How can I reset my password?",
-                answer: "Go to the login page and select 'Forgot Password' to reset it.",
-              },
-              {
                 question: "I don’t have an account. How can I register?",
                 answer: "Visit the registration page to create an account.",
               },
