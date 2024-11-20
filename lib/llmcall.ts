@@ -235,7 +235,12 @@ async function wikiLookup(article_title: string): Promise<string> {
 }
 
 async function jsExec(code: string): Promise<string> {
-  return String(eval(code));
+  try {
+    return String(eval(code));
+  } catch (error) {
+    console.error("JS-Exec error:", error);
+    return String(error);
+  }
 }
 
 /**

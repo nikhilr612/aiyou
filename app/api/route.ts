@@ -17,22 +17,22 @@ interface ApiMetaObject {
 	token?: string;
 }
 
-interface VectorMetaData {}
+interface VectorMetaData {
+	chunk_author: string
+}
 
 function validateMetaObject(t: ApiMetaObject): boolean {
-	if (t.credentials) return Boolean(t.email && t.password);
+	if (t.credentials) return Boolean(t.credentials.email && t.credentials.password);
 	else return Boolean(t.token);
 }
 
 export async function POST(req: Request) {
-	console.debug("API REQUEST:", req);
-
 	const body = await req.json();
 
 	const query_text: string = body.text;
 	const api_method: string = body.method;
 	const meta: string = body.meta;
-	const meta_object: ApiMetaObject = JSON.parse(meta);
+	let meta_object: ApiMetaObject = JSON.parse(meta);
 
 	if (!validateMetaObject(meta_object)) {
 		return new Response(
@@ -41,7 +41,18 @@ export async function POST(req: Request) {
 		);
 	}
 
+	meta_object.token = meta_object.token || NULL_TOKEN;
+
 	try {
+		const permissions = await validateUserToken(meta_object.token);
+		
+		// Pass this to all reponses.
+		const refresh_token = undefined;
+
+		if (permissions.auto_refresh) {
+			// Token refresh logic here...
+		}
+
 		switch (api_method) {
 			case "ingest":
 				// Add text embeddings into the vector store.
@@ -65,14 +76,20 @@ export async function POST(req: Request) {
 				return new Response(JSON.stringify({ error: false }));
 
 			case "createUser":
-				return await caseCreateUser(meta_object);
+				// Create a user from the provided credentials.
+				// Reject if credentials are missing.
+				if (!meta_object.credentials)
+					return new Response(JSON.stringify({ error: true, message: "Invalid user creation request. Missing credientials." }), { status: 400 });
+				const new_token = await createUser(meta_object.credentials);
+				return new Response(JSON.stringify({ error: false, token: new_token }));
 
 			case "authenticateUser":
-				return await caseAuthenticateUser(meta_object);
-
-			// TODO: Remove this. Validate for every call.
-			case "validateUser":
-				return await caseValidateUser(meta_object);
+				/// Authenticate user.
+				/// Reject if credentials are misisng.
+				if (!meta_object.credentials) 
+					return new Response(JSON.stringify({ error: true, message: "Invalid authentication request. Missing credentials." }), { status: 400 });
+				const token = await authenticateUser(meta_object.credentials);
+				return new Response(JSON.stringify({ error: false, token: token }));
 
 			default:
 				return new Response(
@@ -94,124 +111,6 @@ export async function POST(req: Request) {
 
 		return new Response(JSON.stringify({ error: true, message: errorMessage }));
 	}
-}
-
-async function caseCreateUser(meta_object: {
-	[key: string]: string;
-}): Promise<Response> {
-	if (!meta_object.email || !meta_object.password) {
-		return new Response(
-			JSON.stringify({
-				error: true,
-				message: "Missing required fields (meta, email, or password)",
-			}),
-			{ status: 400 },
-		);
-	}
-
-	// Check if the user exists or validate user data using checkUser function
-	const back_res = await createUser(meta_object.email, meta_object.password);
-
-	if (back_res == "exists") {
-		// If the function returns an error message, respond with it
-		return new Response(
-			JSON.stringify({ error: true, message: "User already exists!" }),
-			{ status: 400 },
-		);
-	}
-	if (back_res == "error") {
-		// If the function returns an error message, respond with it
-		return new Response(
-			JSON.stringify({
-				error: true,
-				message: "Error with user creation",
-			}),
-			{ status: 400 },
-		);
-	}
-	// If no issues, return a successful response
-	return new Response(
-		JSON.stringify({
-			error: false,
-			message: "User validated or processed successfully",
-			token: back_res,
-		}),
-		{ status: 200 },
-	);
-}
-
-async function caseAuthenticateUser(
-	meta_object: ApiMetaObject,
-): Promise<Response> {
-	if (!meta_object.email || !meta_object.password) {
-		return new Response(
-			JSON.stringify({
-				error: true,
-				message: "Missing required fields (email or password)",
-			}),
-			{ status: 400 },
-		);
-	}
-
-	console.debug("Email:", meta_object.email, "Password:", meta_object.password);
-
-	// Call the authenticateUser function
-	const back_res = await authenticateUser(
-		meta_object.email,
-		meta_object.password,
-	);
-
-	if (back_res.error) {
-		// If the function returns an error message, respond with it
-		return new Response(
-			JSON.stringify({ error: true, message: back_res.error }),
-			{ status: 400 },
-		);
-	}
-
-	// If no issues, return the token in the successful response
-	return new Response(
-		JSON.stringify({
-			error: false,
-			message: "User authenticated successfully",
-			token: back_res.token,
-		}),
-		{ status: 200 },
-	);
-}
-
-async function caseValidateUser(meta_object: ApiMetaObject): Promise<Response> {
-	if (!meta_object.token) {
-		return new Response(
-			JSON.stringify({
-				error: true,
-				message: "Missing required fields (email or password)",
-			}),
-			{ status: 400 },
-		);
-	}
-
-	console.debug("Password:", meta_object.token);
-
-	// Call the authenticateUser function
-	const back_res = await validateUserToken(meta_object.token);
-
-	if (back_res.error) {
-		return new Response(
-			JSON.stringify({ error: true, message: back_res.error }),
-			{ status: 400 },
-		);
-	}
-
-	// If no issues, return the token in the successful response
-	return new Response(
-		JSON.stringify({
-			error: false,
-			message: "User authenticated successfully",
-			token: meta_object.token,
-		}),
-		{ status: 200 },
-	);
 }
 
 /**
@@ -251,131 +150,121 @@ async function insertTextIntoStore(
 }
 
 async function createUser(
-	email: string,
-	password: string,
-	meta_object?: ApiMetaObject,
-): Promise<string | null> {
-	try {
-		// Check if the email already exists in the database
-		const existingUser = await User.findOne({ email });
-		if (existingUser) {
-			return "exists";
-		}
+	new_credentials: AuthCredentials,
+): Promise<string> {
+	// Check if the email already exists in the database
+	const existingUser = await User.findOne({ email: new_credentials.email });
+	if (existingUser) throw new Error("User already exists!");
 
-		// Hash the password before saving it in the database
-		const hashedPassword = await bcrypt.hash(password, 10);
+	// Hash the password before saving it in the database
+	const hashedPassword = await bcrypt.hash(new_credentials.password, 10);
 
-		// Generate a JWT token
-		const token = jwt.sign({ email }, SECRET_KEY, {
-			expiresIn: `${ALLOWED_TIME}s`,
-		});
-		// Create a new user
-		const newUser = new User({
-			email: email,
-			password: hashedPassword,
-			token: token,
-		});
+	// Generate a JWT token
+	const token = jwt.sign({ email: new_credentials.email }, SECRET_KEY, {
+		expiresIn: `${ALLOWED_TIME}s`,
+	});
 
-		await newUser.save();
-		// Store the token in IndexedDB on the client side
-		//await storeTokenInIndexedDB(token);   removed and added on the client side
+	// Create a new user
+	const newUser = new User({
+		email: new_credentials.email,
+		password: hashedPassword,
+		token: token,
+	});
 
-		console.debug("User successfully created and token stored!");
-		return token; //return token to indicate success
-	} catch (err) {
-		console.error("Error during user creation:", err);
-		return "error";
-	}
+	await newUser.save();
+	// Store the token in IndexedDB on the client side
+	//await storeTokenInIndexedDB(token);   removed and added on the client side
+
+	console.debug("User successfully created and token stored!");
+	return token; //return token to indicate success
 }
 
-/// *** DEV AUTH ESCAPE HATCH. DO NOT COMMIT ***
-let DEV_AUTH_TOKEN = "";
-/// --------------------------------------------
+async function authenticateUser(credentials: AuthCredentials): Promise<string> {
 
-interface AuthResponse {
-	token: string | null;
-	error: string | null;
-}
-
-async function authenticateUser(
-	email: string,
-	password: string,
-): Promise<AuthResponse> {
+	// -------------------DEV-AUTH-STUFF----------------
 	if (
 		process.env.ALLOW_DEV_AUTH &&
-		email == process.env.DEV_AUTH_UNAME &&
-		password == process.env.DEV_AUTH_PASS
+		credentials.email == process.env.DEV_AUTH_UNAME &&
+		credentials.password == process.env.DEV_AUTH_PASS
 	) {
-		const token = jwt.sign({ email }, SECRET_KEY, {
+		const token = jwt.sign({ credentials.email }, SECRET_KEY, {
 			expiresIn: `${ALLOWED_TIME}s`,
 		});
-		DEV_AUTH_TOKEN = token;
-		return { token: DEV_AUTH_TOKEN, error: null };
+		return token;
 	}
-	/// ----
+	// ------------------REMOVE-IN-RELEASE---------------
 
-	try {
-		// Check if the email exists in the database
-		const existingUser = await User.findOne({ email });
-		if (!existingUser) {
-			return { token: null, error: "User does not exist." };
-		}
+	// Check if the email exists in the database
+	const existingUser = await User.findOne({ email: credentials.email });
+	if (!existingUser) throw new Error("User does not exist.");
 
-		// Verify the password
-		const isPasswordCorrect = await bcrypt.compare(
-			password,
-			existingUser.password,
-		);
-		if (!isPasswordCorrect) {
-			return { token: null, error: "Invalid password." };
-		}
+	// Verify the password
+	const isPasswordCorrect = await bcrypt.compare(
+		credentials.password,
+		existingUser.password,
+	);
 
-		// Generate a JWT token
-		const token = jwt.sign({ email }, SECRET_KEY, {
-			expiresIn: `${ALLOWED_TIME}s`,
-		});
-		existingUser.token = token;
-		await existingUser.save();
-		return { token, error: null };
-	} catch (err) {
-		console.error("Error during user authentication:", err);
-		return {
-			token: null,
-			error: "An error occurred during authentication. Please try again." + err,
-		};
-	}
+	if (!isPasswordCorrect) throw new Error("Incorrect password.");
+
+	// Generate a JWT token
+	const token = jwt.sign({ email: credentials.email }, SECRET_KEY, {
+		expiresIn: `${ALLOWED_TIME}s`,
+	});
+
+	existingUser.token = token;
+	await existingUser.save();
+	return token;
 }
 
+interface ApiPermissions {
+	allow_index: boolean,
+	allow_user_calls: boolean,
+	allow_create: boolean,
+	auto_refresh: boolean
+}
+
+const NULL_TOKEN = "NULL_TOKEN";
+const NULL_PERMISSIONS: ApiPermissions = { allow_create: true, allow_index: false, allow_user_calls: false, auto_refresh: false };
+const DEV_PERMISSIONS: ApiPermissions = {
+	allow_create: true,
+	allow_index: true,
+	allow_user_calls: true,
+	auto_refresh: false
+};
+
+/**
+ * Check if the provided token is valid, and return the permissions awarded.
+ * It is noteworthy, that expired tokens are not necessarily deemed invalid.
+ * */
 async function validateUserToken(
 	token: string,
-): Promise<{ valid: boolean; error: string | null }> {
+): Promise<ApiPermissions> {
+	if (token == NULL_TOKEN) return NULL_PERMISSIONS; 
+
 	const decoded = jwt.decode(token) as jwt.JwtPayload | null;
 	const meta_object = jwt.verify(token, process.env.SECRET_KEY);
+
 	if (
 		process.env.ALLOW_DEV_AUTH &&
 		meta_object.email == process.env.DEV_AUTH_UNAME
 	) {
-		return { valid: true, error: null, token: token };
+		return DEV_PERMISSIONS;
 	}
-	if (!decoded || !decoded.exp) {
-		return { valid: false, error: "Invalid token." }; // Invalid token format or missing expiration
-	}
+
+	if (!decoded || !decoded.exp) throw new Error("Invalid USER token.");
+
+	const existingUser = await User.findOne({ token: token });
+	if (!existingUser) throw new Error("Invalid USER token.");
 
 	const currentTime = Math.floor(Date.now() / 1000);
 	const exp = decoded.exp;
 
-	const existingUser = await User.findOne({ token: token });
-	if (!existingUser || exp < currentTime) {
-		return { valid: false, error: "Invalid token." };
-	}
-	if (exp - currentTime < ALLOWED_TIME / 2) {
-		token = jwt.sign(
-			{ email: existingUser.email }, // Assume the record with token has a username(which in our case is email)
-			SECRET_KEY, // Use the secret key from environment
-			{ expiresIn: `${ALLOWED_TIME}s` }, // Reset expiration time
-		);
-	}
-	existingUser.token = token;
-	existingUser.save();
-	return { valid: true, error: null, token: token };
+	if (currentTime > exp) throw new Error("Token expired."); 
+	
+	return {
+		allow_create: false,
+		allow_index: false,
+		allow_user_calls: true,
+		auto_refresh: Boolean((currentTime - exp) < (ALLOWED_TIME / 2))
+	};
 }
