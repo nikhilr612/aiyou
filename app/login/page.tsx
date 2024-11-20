@@ -105,6 +105,7 @@ export default function LoginPage() {
           description: "You are now logged in.",
         });
         await storeTokenInIndexedDB(result.token); // Store token in IndexedDB
+        console.debug("Stored in IndexedDB!");
         router.push("/main"); // Redirect to main page after login
       }
     } catch (err) {
@@ -141,7 +142,7 @@ export default function LoginPage() {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form method="POST" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
                 htmlFor="email"

@@ -53,6 +53,7 @@ import { useRouter } from "next/navigation";
 //import {validateUserToken} from './validateUser'
 import jwt from "jsonwebtoken";
 import { NextRouter } from "next/router";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 interface Thread {
   id: number;
   name: string;
@@ -153,19 +154,20 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
 };
 
 // TODO: Add correct type here.
-async function validateUserToken(toast: any, router: NextRouter){
+async function validateUserToken(toast: any, router: AppRouterInstance) : Promise<string | undefined> {
   //shows login toast
   try {
     // Step 1: Retrieve token from IndexedDB
     const token = await getTokenFromIndexedDB();
+    console.debug("Retrieved token:", token);
     if (!token) {
       toast({
         title: "Error",
         description: "No token found. Please log in again.",
         variant: "destructive",
       });
-      router.push("/fcku");
-      return;
+      // router.push("/fcku");
+      return undefined;
     }
     const response = await fetch("/api", {
       method: "POST",
@@ -183,21 +185,22 @@ async function validateUserToken(toast: any, router: NextRouter){
   // TODO: CHECK LOGIC HERE....
 
     if (response.ok && !result.error) {
-      await storeTokenInIndexedDB(result.token);
+      await storeTokenInIndexedDB(token);
+      return token;
     } else if (result.error === "Invalid token.") {
       toast({
         title: "Invalid Token",
         description: "Your session has expired. Please log in again.",
         variant: "destructive",
       });
-      router.push("/fcku");
+      // router.push("/fcku");
     } else {
       toast({
         title: "Error",
         description: result.message || "An error occurred.",
         variant: "destructive",
       });
-      router.push("/fcku");
+      // router.push("/fcku");
     }
   } catch (err) {
     console.error("Error during token validation:", err);
@@ -206,7 +209,7 @@ async function validateUserToken(toast: any, router: NextRouter){
       description: "An error occurred during the validation process.",
       variant: "destructive",
     });
-    router.push("/fcku");
+    // router.push("/fcku");
   }
 };
 
@@ -278,11 +281,13 @@ export default function MainPage() {
       };
     });
     try {
-      validateUserToken();
+      const token = await validateUserToken(toast, router) || "NULL_TOKEN";
       const response = await agentic_call(
         selectedEndpoint,
         messages[currentThread.id],
         text,
+        undefined, // For now.
+        token
       );
       const response_message: Message = { content: response, isUser: false };
       if (response.trim().length > 0) {

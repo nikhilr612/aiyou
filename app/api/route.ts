@@ -206,7 +206,7 @@ async function authenticateUser(credentials: AuthCredentials): Promise<string> {
 		credentials.email == process.env.DEV_AUTH_UNAME &&
 		credentials.password == process.env.DEV_AUTH_PASS
 	) {
-		const token = jwt.sign({ credentials.email }, SECRET_KEY, {
+		const token = jwt.sign({ email: credentials.email }, SECRET_KEY, {
 			expiresIn: `${ALLOWED_TIME}s`,
 		});
 		return token;
