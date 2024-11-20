@@ -169,7 +169,7 @@ export async function agentic_call(
     body: JSON.stringify({
       text: response1.message.content,
       method: "retrieve",
-      meta: "", // TODO: Add JSON for user-related stuff here.
+      meta: "{}", // TODO: Add JSON for user-related stuff here.
     }),
   });
 

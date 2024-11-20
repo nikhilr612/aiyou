@@ -7,13 +7,39 @@ const retriever_limit = 5;
 const ALLOWED_TIME = 3600; //In seconds
 const SECRET_KEY = process.env.SECRET_KEY;
 
+interface AuthCredentials {
+	email: string;
+	password: string;
+}
+
+interface ApiMetaObject {
+	credentials?: AuthCredentials;
+	token?: string;
+}
+
+interface VectorMetaData {}
+
+function validateMetaObject(t: ApiMetaObject): boolean {
+	if (t.credentials) return Boolean(t.email && t.password);
+	else return Boolean(t.token);
+}
+
 export async function POST(req: Request) {
+	console.debug("API REQUEST:", req);
+
 	const body = await req.json();
 
 	const query_text: string = body.text;
 	const api_method: string = body.method;
 	const meta: string = body.meta;
-	const meta_object: { [key: string]: string } = JSON.parse(meta);
+	const meta_object: ApiMetaObject = JSON.parse(meta);
+
+	if (!validateMetaObject(meta_object)) {
+		return new Response(
+			JSON.stringify({ error: false, message: "Invalid meta object." }),
+			{ status: 400, statusText: "Bad Request" },
+		);
+	}
 
 	try {
 		switch (api_method) {
@@ -44,6 +70,7 @@ export async function POST(req: Request) {
 			case "authenticateUser":
 				return await caseAuthenticateUser(meta_object);
 
+			// TODO: Remove this. Validate for every call.
 			case "validateUser":
 				return await caseValidateUser(meta_object);
 
@@ -113,9 +140,9 @@ async function caseCreateUser(meta_object: {
 	);
 }
 
-async function caseAuthenticateUser(meta_object: {
-	[key: string]: string;
-}): Promise<Response> {
+async function caseAuthenticateUser(
+	meta_object: ApiMetaObject,
+): Promise<Response> {
 	if (!meta_object.email || !meta_object.password) {
 		return new Response(
 			JSON.stringify({
@@ -153,9 +180,7 @@ async function caseAuthenticateUser(meta_object: {
 	);
 }
 
-async function caseValidateUser(meta_object: {
-	[key: string]: string;
-}): Promise<Response> {
+async function caseValidateUser(meta_object: ApiMetaObject): Promise<Response> {
 	if (!meta_object.token) {
 		return new Response(
 			JSON.stringify({
@@ -218,7 +243,7 @@ async function createVectorSearchIndex() {
 async function insertTextIntoStore(
 	text: string,
 	meta_json?: string,
-	meta_object?: { [key: string]: any },
+	meta_object?: ApiMetaObject,
 ) {
 	const embeddings = await generateTextEmbedding(text);
 	const meta = meta_json ? meta_json : JSON.stringify(meta_object || {});
@@ -228,7 +253,7 @@ async function insertTextIntoStore(
 async function createUser(
 	email: string,
 	password: string,
-	meta_object?: { [key: string]: any },
+	meta_object?: ApiMetaObject,
 ): Promise<string | null> {
 	try {
 		// Check if the email already exists in the database
