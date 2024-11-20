@@ -36,7 +36,6 @@ export async function POST(req: Request) {
 	const api_method: string = body.method;
 	const meta: string = body.meta;
 	let meta_object: ApiMetaObject = JSON.parse(meta);
-	console.debug("meta object", meta_object);
 
 	if (!validateMetaObject(meta_object)) {
 		return new Response(
@@ -284,7 +283,7 @@ async function authenticateUser(credentials: AuthCredentials): Promise<string> {
 		credentials.password == process.env.DEV_AUTH_PASS
 	) {
 		const token = jwt.sign({ email: credentials.email }, SECRET_KEY, {
-			expiresIn: `${ALLOWED_TIME}s`,
+			expiresIn: `10h`,
 		});
 		return token;
 	}
@@ -340,7 +339,6 @@ const DEV_PERMISSIONS: ApiPermissions = {
 async function validateUserToken(token: string): Promise<ApiPermissions> {
 	if (token == NULL_TOKEN) return NULL_PERMISSIONS;
 
-	const decoded = jwt.decode(token) as jwt.JwtPayload | null;
 	const meta_object = jwt.verify(token, process.env.SECRET_KEY);
 
 	if (
@@ -350,13 +348,14 @@ async function validateUserToken(token: string): Promise<ApiPermissions> {
 		return DEV_PERMISSIONS;
 	}
 
-	if (!decoded || !decoded.exp) throw new Error("Invalid USER token.");
+	if (!meta_object || !meta_object.exp) throw new Error("Invalid USER token.");
 
 	const existingUser = await User.findOne({ token: token });
+	console.debug("token:" + token);
 	if (!existingUser) throw new Error("Invalid USER token.");
 
 	const currentTime = Math.floor(Date.now() / 1000);
-	const exp = decoded.exp;
+	const exp = meta_object.exp;
 
 	if (currentTime > exp) throw new Error("Token expired.");
 
@@ -364,15 +363,18 @@ async function validateUserToken(token: string): Promise<ApiPermissions> {
 		allow_create: false,
 		allow_index: false,
 		allow_user_calls: true,
-		auto_refresh: Boolean(currentTime - exp < ALLOWED_TIME / 2),
+		auto_refresh: Boolean(exp - currentTime < ALLOWED_TIME - 30),
 	};
 }
 
 async function refreshToken(token: string): string {
 	const existingUser = await User.findOne({ token: token });
-	existingUser.token = jwt.sign({ email: existingUser.email }, SECRET_KEY, {
+	const new_token = jwt.sign({ email: existingUser.email }, SECRET_KEY, {
 		expiresIn: `${ALLOWED_TIME}s`,
 	});
-	existingUser.save();
-	return existingUser.token;
+	existingUser.token = new_token;
+	await existingUser.save();
+	console.debug(existingUser);
+	console.debug(new_token);
+	return new_token;
 }

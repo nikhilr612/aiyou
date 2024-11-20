@@ -9,6 +9,17 @@ import Link from "next/link";
 import { ModeToggle } from "@/components/ui/modetoggle";
 import { useToast } from "@/hooks/use-toast";
 
+interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+interface ApiMetaObject {
+  credentials?: AuthCredentials;
+  token?: string;
+  chunk_source?: string;
+}
+
 async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("UserDB", 1);
@@ -62,6 +73,44 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
   });
 }
 
+async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
+  // TODO: change the return type
+  const response = await fetch("/api", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      meta: JSON.stringify({
+        credentials: meta.credentials,
+        token: meta.token,
+      }),
+      method: method,
+    }),
+  });
+  console.log(response);
+  const result = await response.json();
+  if (result.refresh) {
+    const newResponse = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        meta: JSON.stringify({
+          credentials: meta.credentials,
+          token: meta.token,
+        }),
+        method: "refresh",
+      }),
+    });
+    const newResult = await newResponse.json();
+    await storeTokenInIndexedDB(newResult.token);
+    return newResult;
+  }
+  return result;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -75,23 +124,11 @@ export default function LoginPage() {
 
     try {
       // Send request to the API
-      const response = await fetch("/api", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          meta: JSON.stringify({
-            credentials: { email: email, password: password }
-          }),
-          method: "authenticateUser", // Specify the login method
-        }),
+      const result = await sendAPIRequest("authenticateUser", {
+        credentials: { email: email, password: password },
       });
 
-      console.debug(response);
-      const result = await response.json();
-
-      if (!response.ok || result.error) {
+      if (result.error) {
         console.error("Error during login:", result.error || "Unknown error");
         toast({
           title: result.message || "Login Failed",

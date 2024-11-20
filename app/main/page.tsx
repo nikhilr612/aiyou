@@ -59,6 +59,17 @@ interface Thread {
   name: string;
 }
 
+interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+interface ApiMetaObject {
+  credentials?: AuthCredentials;
+  token?: string;
+  chunk_source?: string;
+}
+
 const THREAD_IMAGE_PLACEHOLDER: string = "/images/bot-avatar.png";
 const USER_AVATAR_PLACEHOLDER: string = "/images/user-avatar.png";
 
@@ -98,7 +109,7 @@ async function getTokenFromIndexedDB(): Promise<string | null> {
       reject("Error opening IndexedDB");
     };
   });
-};
+}
 
 async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -151,10 +162,52 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
       reject(request.error);
     };
   });
-};
+}
+
+async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
+  // TODO: change the return type
+  const response = await fetch("/api", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      meta: JSON.stringify({
+        credentials: meta.credentials,
+        token: meta.token,
+        chunk_source: meta.chunk_source,
+      }),
+      method: method,
+    }),
+  });
+  const result = await response.json();
+  if (result.refresh) {
+    const newResponse = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        meta: JSON.stringify({
+          credentials: meta.credentials,
+          token: meta.token,
+          chunk_source: meta.chunk_source,
+        }),
+        method: "refresh",
+      }),
+    });
+    const newResult = await newResponse.json();
+    await storeTokenInIndexedDB(newResult.token);
+    return newResult;
+  }
+  return result;
+}
 
 // TODO: Add correct type here.
-async function validateUserToken(toast: any, router: AppRouterInstance) : Promise<string | undefined> {
+async function validateUserToken(
+  toast: any,
+  router: AppRouterInstance,
+): Promise<string | undefined> {
   //shows login toast
   try {
     // Step 1: Retrieve token from IndexedDB
@@ -166,41 +219,30 @@ async function validateUserToken(toast: any, router: AppRouterInstance) : Promis
         description: "No token found. Please log in again.",
         variant: "destructive",
       });
-      // router.push("/fcku");
+      router.push("/fcku");
       return undefined;
     }
-    const response = await fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        method: "verify",
-        meta: JSON.stringify({ token: token }),
-      }),
-    });
 
-    const result = await response.json();
+    const result = await sendAPIRequest("verify", { token: token });
 
-  // TODO: CHECK LOGIC HERE....
+    // TODO: CHECK LOGIC HERE....
 
-    if (response.ok && !result.error) {
-      await storeTokenInIndexedDB(token);
+    if (!result.error) {
       return token;
-    } else if (result.error === "Invalid token.") {
+    } else if (result.message === "jwt expired") {
       toast({
-        title: "Invalid Token",
+        title: "Token expired",
         description: "Your session has expired. Please log in again.",
         variant: "destructive",
       });
-      // router.push("/fcku");
+      router.push("/login");
     } else {
       toast({
         title: "Error",
         description: result.message || "An error occurred.",
         variant: "destructive",
       });
-      // router.push("/fcku");
+      router.push("/fcku");
     }
   } catch (err) {
     console.error("Error during token validation:", err);
@@ -209,16 +251,14 @@ async function validateUserToken(toast: any, router: AppRouterInstance) : Promis
       description: "An error occurred during the validation process.",
       variant: "destructive",
     });
-    // router.push("/fcku");
+    router.push("/fcku");
   }
-};
-
+}
 
 export default function MainPage() {
   // For Showing toasts.
   const { toast } = useToast();
   const router = useRouter();
-  
 
   const [threads, setThreads] = useState<Thread[]>([{ id: 1, name: "Thread" }]);
 
@@ -281,13 +321,13 @@ export default function MainPage() {
       };
     });
     try {
-      const token = await validateUserToken(toast, router) || "NULL_TOKEN";
+      const token = (await getTokenFromIndexedDB()) || "NULL_TOKEN";
       const response = await agentic_call(
         selectedEndpoint,
         messages[currentThread.id],
         text,
         undefined, // For now.
-        token
+        token,
       );
       const response_message: Message = { content: response, isUser: false };
       if (response.trim().length > 0) {
@@ -549,21 +589,27 @@ function IngestItem() {
           TEXT_DELIMS,
         );
         // TODO: Check this
-        const promises = chunks.map(async (chunk) =>
-          fetch("/api", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              text: chunk,
-              method: "ingest",
-              meta: JSON.stringify({
-                token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
-                chunk_source: file.name
-              }), // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
-            }),
-          }).then((r) => r.json()),
+        const promises = chunks.map(
+          /*async (chunk) =>
+            fetch("/api", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: chunk,
+                method: "ingest",
+                meta: JSON.stringify({
+                  token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
+                  chunk_source: file.name,
+                }), // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
+              }),
+            }).then((r) => r.json()),*/
+          sendAPIRequest("ingest", {
+            token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
+            chunk_source: file.name,
+          }),
         );
         const results = await Promise.all(promises);
+        console.debug(results);
         const error_count = results.filter((a) => a.error).length;
         if (error_count > 0) {
           console.error(
