@@ -168,7 +168,7 @@ async function timezoneInfo(location: string): Promise<string> {
       - UTC Offset: ${utc_offset}
     `;
   } catch (error) {
-    return `Failed to fetch time zone information for ${location}.`;
+    return `Failed to fetch time zone information for ${location}. Caused by: ${error}`;
   }
 }
 
@@ -553,7 +553,7 @@ async function quoteAuthor(author: string): Promise<string> {
     // Maximum of 15 quotes only. 
     const quotesToReturn = data.slice(0, 15);
     return quotesToReturn
-      .map((quote: any) => `"${quote.q}" — ${quote.a}`)
+      .map((quote: { q: string; a: string; }) => `"${quote.q}" — ${quote.a}`)
       .join("\n");
   } catch (error) {
     console.error("Failed to fetch quote by author:", error);

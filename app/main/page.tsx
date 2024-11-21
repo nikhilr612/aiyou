@@ -50,10 +50,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
 import materialDark from "react-syntax-highlighter/dist/esm/styles/prism/material-dark";
 import { useRouter } from "next/navigation";
-//import {validateUserToken} from './validateUser'
-import jwt from "jsonwebtoken";
-import { NextRouter } from "next/router";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 interface Thread {
   id: number;
   name: string;
@@ -164,7 +162,11 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
   });
 }
 
-async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
+/**
+ * Convenience function to make an API call with the specified API `method` and `meta` object.
+ * */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function sendAPIRequest(method: string, meta: ApiMetaObject): Promise<any> {
   // TODO: change the return type
   const response = await fetch("/api", {
     method: "POST",
@@ -181,31 +183,14 @@ async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
     }),
   });
   const result = await response.json();
-  if (result.refresh) {
-    const newResponse = await fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        meta: JSON.stringify({
-          credentials: meta.credentials,
-          token: meta.token,
-          chunk_source: meta.chunk_source,
-        }),
-        method: "refresh",
-      }),
-    });
-    const newResult = await newResponse.json();
-    await storeTokenInIndexedDB(newResult.token);
-    return newResult;
-  }
+  if (result.refreshed_token) await storeTokenInIndexedDB(result.refreshed_token);
   return result;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // TODO: Add correct type here.
 async function validateUserToken(
-  toast: any,
+  toast: (a: {title: string; description: string; variant: "destructive" | "default" | null | undefined }) => {id: string },
   router: AppRouterInstance,
 ): Promise<string | undefined> {
   //shows login toast

@@ -4,7 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const retriever_limit = 5;
-const ALLOWED_TIME = 3600; //In seconds
+const ALLOWED_TIME = 1800; //In seconds
+const REFRESH_WINDOW = 300; // 5 mins.
 const SECRET_KEY = process.env.SECRET_KEY;
 
 interface AuthCredentials {
@@ -19,9 +20,9 @@ interface ApiMetaObject {
 }
 
 /// TODO(Low Priority): Store information about the user ingesting data in to vector store.
-interface VectorMetaData {
+/* interface VectorMetaData {
 	chunk_author: string;
-}
+} */
 
 function validateMetaObject(t: ApiMetaObject): boolean {
 	if (t.credentials)
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
 	const query_text: string = body.text;
 	const api_method: string = body.method;
 	const meta: string = body.meta;
-	let meta_object: ApiMetaObject = JSON.parse(meta);
+	const meta_object: ApiMetaObject = JSON.parse(meta);
 
 	if (!validateMetaObject(meta_object)) {
 		return new Response(
@@ -49,14 +50,9 @@ export async function POST(req: Request) {
 	try {
 		const permissions = await validateUserToken(meta_object.token);
 
-		// Pass this to all reponses.
-		const refreshed_token = undefined;
-
-		if (permissions.auto_refresh) {
-			// Token refresh logic here...
-			// TODO: If this request has been made *within* some fraction of `ALLOWED_TIME` since *generation* of token- create a new token for `ALLOWED_TIME` from now.
-			// Consider making this window ~15 mins.
-		}
+		let refreshed_token = undefined;
+		if (permissions.auto_refresh) // Refresh the token when possible.
+			refreshed_token = await refreshToken(meta_object.token);
 
 		switch (api_method) {
 			case "ingest":
@@ -76,7 +72,7 @@ export async function POST(req: Request) {
 					meta_object.chunk_source || "User uploaded context",
 				);
 				return new Response(
-					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+					JSON.stringify({ error: false, refreshed_token: refreshed_token }),
 				);
 
 			case "retrieve":
@@ -95,7 +91,7 @@ export async function POST(req: Request) {
 					JSON.stringify({
 						error: false,
 						documents: relevant_documents,
-						refresh: permissions.auto_refresh,
+						refreshed_token: refreshed_token,
 					}),
 				);
 
@@ -115,7 +111,7 @@ export async function POST(req: Request) {
 				// Reject is user is 'anon'.
 				await createVectorSearchIndex();
 				return new Response(
-					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+					JSON.stringify({ error: false }),
 				);
 
 			case "createUser":
@@ -157,6 +153,7 @@ export async function POST(req: Request) {
 
 			case "verify":
 				/// Verify that the token has user permissions.
+				/// Does _nothing_ otherwise.
 				/// Otherwise
 				if (!permissions.allow_user_calls)
 					return new Response(
@@ -167,20 +164,21 @@ export async function POST(req: Request) {
 						{ status: 449 },
 					);
 				return new Response(
-					JSON.stringify({ error: false, refresh: permissions.auto_refresh }),
+					JSON.stringify({ error: false, refreshed_token: refreshed_token }),
 				);
 
 			case "refresh":
-				//check if the token has auto_refresh enabled
+				/// **DEPRECATED**
+				/// check if the token has auto_refresh enabled
+				/// Return refreshed token.
 				if (!permissions.auto_refresh)
 					return new Response(
 						JSON.stringify({
 							error: true,
-							message: "Bad Request",
+							message: "Insufficient permissions.",
 						}),
-						{ status: 400 },
+						{ status: 401, statusText: "Denied." },
 					);
-				const refreshed_token = await refreshToken(meta_object.token);
 				return new Response(
 					JSON.stringify({ error: false, token: refreshed_token }),
 					{ status: 200 },
@@ -212,7 +210,7 @@ export async function POST(req: Request) {
 }
 
 /**
- * Retrieve documents from
+ * Retrieve documents from Vector Store.
  * */
 async function queryVectorStore(query_text: string): Promise<string[]> {
 	const embeddings = await generateTextEmbedding(query_text);
@@ -247,6 +245,10 @@ async function insertTextIntoStore(
 	await vecstore.add([{ vector: embeddings.tolist(), text: text, meta: meta }]);
 }
 
+/**
+ * Create a user with the provided credentials and return an associated token.
+ * Throws error if the username (`email`) already exists, or any error occurred in the process of storing credentials and generating token.
+ * */
 async function createUser(new_credentials: AuthCredentials): Promise<string> {
 	// Check if the email already exists in the database
 	const existingUser = await User.findOne({ email: new_credentials.email });
@@ -319,18 +321,30 @@ interface ApiPermissions {
 }
 
 const NULL_TOKEN = "NULL_TOKEN";
+
 const NULL_PERMISSIONS: ApiPermissions = {
 	allow_create: true,
 	allow_index: false,
 	allow_user_calls: false,
 	auto_refresh: false,
 };
+
 const DEV_PERMISSIONS: ApiPermissions = {
 	allow_create: true,
 	allow_index: true,
 	allow_user_calls: true,
-	auto_refresh: false,
+	auto_refresh: false, // Don't refresh this; better to re-login.
 };
+
+/**
+ * Outlines the server policy of determining if a token is allowed to refresh.
+ * Liable to change.
+ * */
+function refreshPolicy(expiry: number, currentTime: number) : boolean {
+	if (currentTime > expiry + REFRESH_WINDOW) return false;
+	else if (currentTime > expiry) return true;
+	else return false;
+}
 
 /**
  * Check if the provided token is valid, and return the permissions awarded.
@@ -363,18 +377,24 @@ async function validateUserToken(token: string): Promise<ApiPermissions> {
 		allow_create: false,
 		allow_index: false,
 		allow_user_calls: true,
-		auto_refresh: Boolean(exp - currentTime < ALLOWED_TIME - 30),
+		auto_refresh: refreshPolicy(exp, currentTime),
 	};
 }
 
-async function refreshToken(token: string): string {
+/**
+ * Refresh the token by verifying that a user is associated with it currently.
+ * */
+async function refreshToken(token: string): Promise<string> {
 	const existingUser = await User.findOne({ token: token });
+	if (!existingUser) throw new Error("Orphan token; no associated user.");
+
 	const new_token = jwt.sign({ email: existingUser.email }, SECRET_KEY, {
 		expiresIn: `${ALLOWED_TIME}s`,
 	});
+
 	existingUser.token = new_token;
 	await existingUser.save();
-	console.debug(existingUser);
-	console.debug(new_token);
+	
+	console.debug("Token change:", existingUser, "new:", new_token);
 	return new_token;
 }

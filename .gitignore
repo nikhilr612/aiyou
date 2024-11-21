@@ -40,3 +40,7 @@ next-env.d.ts
 
 # db files
 /text-embeddings-db/*
+
+# sublime stuff
+*.sublime-project
+*.sublime-workspace
