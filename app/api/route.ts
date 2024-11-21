@@ -2,7 +2,7 @@ import { vecstore, User } from "../../lib/db";
 import { generateTextEmbedding } from "../../lib/model";
 import { ApiMetaObject, AuthCredentials } from "../../lib/apitypes";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const retriever_limit = 5;
 const ALLOWED_TIME = 1800; //In seconds
@@ -360,10 +360,10 @@ function refreshPolicy(expiry: number, currentTime: number): boolean {
 async function validateUserToken(token: string): Promise<ApiPermissions> {
 	if (token == NULL_TOKEN) return NULL_PERMISSIONS;
 
-	const meta_object: { email: string; exp: number } = jwt.verify(
+	const meta_object = jwt.verify(
 		token,
 		SECRET_KEY,
-	);
+	) as JwtPayload;
 
 	if (
 		process.env.ALLOW_DEV_AUTH &&

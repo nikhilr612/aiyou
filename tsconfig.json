@@ -19,7 +19,8 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "target": "es2017" // Added target to es2017 to support top-level await
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

@@ -3,16 +3,16 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 const DB_NAME = "./text-embeddings-db";
 const TABLE_NAME = "embeddings";
-const MONGO_HOST = "mongodb://127.0.0.1:27017";
+const MONGO_HOST = process.env.MONGO_HOST || "mongodb://127.0.0.1:27017";
 
-// Connect to MongoDB
-mongoose
-  .connect(`${MONGO_HOST}/aiyou-user`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.debug("MongoDB connected"))
-  .catch((err) => console.error("MongoError:", err));
+mongoose.connect(`${MONGO_HOST}/aiyou-user`)
+.then(() => {
+    console.debug("MongoDB connected");
+})
+.catch((err) => {
+    console.error("MongoError:", err);
+});
+
 
 // Define the IUser interface
 interface IUser extends Document {

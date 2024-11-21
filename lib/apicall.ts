@@ -1,6 +1,7 @@
 // API-stuff client-side.
 
 import { ApiMetaObject } from "./apitypes";
+import { storeTokenInIndexedDB } from "./tokenutils";
 
 /**
  * Convenience function to make an API call with the specified API `method` and `meta` object.

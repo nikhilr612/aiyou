@@ -7,7 +7,7 @@ export default function NotFoundPage() {
   return (
     <div>
       <div className="absolute top-4 right-4">
-        <ModeToggle className="space-x-4 space-y-6" />
+        <ModeToggle/>
       </div>
       <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
         <header className="flex flex-col items-center space-y-4">

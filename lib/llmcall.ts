@@ -412,18 +412,34 @@ export async function agentic_call(
 }
 
 /**
- * Retrieve article/page summary from wikipedia.
+ * Fetch from url via CORS proxy.
  * */
+async function fetchWithCorsProxy(url: string): Promise<Response> {
+  const corsProxy = "https://cors-anywhere.herokuapp.com/";
+  const proxiedUrl = corsProxy + url;
+
+  try {
+    const response = await fetch(proxiedUrl);
+    if (!response.ok) {
+      throw new Error(`Error fetching data: ${response.statusText}`);
+    }
+    return response;
+  } catch (error) {
+    console.error("Failed to fetch data with CORS proxy:", error);
+    throw new Error("Failed to fetch data with CORS proxy.");
+  }
+}
+
+/**
+ * Retrieve article/page summary from Wikipedia.
+ */
 async function wikiLookup(article_title: string): Promise<string> {
   const endpoint = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(article_title)}`;
 
   try {
-    const response = await fetch(endpoint);
-    if (!response.ok) {
-      return `Error fetching Wikipedia summary: ${response.statusText}`;
-    }
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
-    return data.extract; // This should contain text for the article.
+    return data.extract || "No summary available.";
   } catch (error) {
     console.error("Failed to fetch Wikipedia summary:", error);
     return "Failed to fetch summary from Wikipedia.";
@@ -440,15 +456,13 @@ async function jsExec(code: string): Promise<string> {
 }
 
 /**
- * Perform forward-geocoding through nominatim.
- * */
+ * Perform forward-geocoding through Nominatim.
+ */
 async function getCoordinatesFromNominatim(location: string): Promise<{ lat: number; lon: number }> {
   const endpoint = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&addressdetails=1`;
 
   try {
-    const response = await fetch(endpoint);
-    if (!response.ok) throw new Error("Error fetching geocoding data:" + response.statusText);
-
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
     if (data.length > 0) {
       const { lat, lon } = data[0];
@@ -463,15 +477,12 @@ async function getCoordinatesFromNominatim(location: string): Promise<{ lat: num
 
 /**
  * Get weather report from location through OpenMeteo.
- * */
+ */
 async function weatherReport(location: string): Promise<string> {
   try {
     const { lat, lon } = await getCoordinatesFromNominatim(location);
     const endpoint = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-    const response = await fetch(endpoint);
-    if (!response.ok) {
-      return `Error fetching weather data: ${response.statusText}`;
-    }
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
     const weatherData = data.current_weather;
 
@@ -494,13 +505,11 @@ async function weatherReport(location: string): Promise<string> {
 
 /**
  * Convert between currencies at the current rate through Frankfurter.
- * */
+ */
 async function convertCurrency(baseCurrency: string, targetCurrency: string, amount: number): Promise<string> {
   const endpoint = `https://api.frankfurter.app/latest?base=${baseCurrency}&symbols=${targetCurrency}`;
   try {
-    const response = await fetch(endpoint);
-    if (!response.ok) return `Error fetching exchange rate: ${response.statusText}`;
-
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
     const rate = data.rates[targetCurrency];
     if (!rate) return `No exchange rate found for ${baseCurrency} to ${targetCurrency}.`;
@@ -513,17 +522,13 @@ async function convertCurrency(baseCurrency: string, targetCurrency: string, amo
 }
 
 /**
- * Fetch a random quote from `ZenQuotes.io`
- * */
+ * Fetch a random quote from ZenQuotes.io
+ */
 async function randomQuote(): Promise<string> {
   const endpoint = "https://zenquotes.io/api/random";
 
   try {
-    const response = await fetch(endpoint);
-    if (!response.ok) {
-      return `Error fetching quote: ${response.statusText}`;
-    }
-
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
     const quote = data[0]?.q || "No quote found.";
     const author = data[0]?.a || "Unknown";
@@ -536,19 +541,16 @@ async function randomQuote(): Promise<string> {
 }
 
 /**
- * Fetch upto 15 quotes by an author from `ZenQuotes.io`
- * */
+ * Fetch up to 15 quotes by an author from ZenQuotes.io
+ */
 async function quoteAuthor(author: string): Promise<string> {
   const endpoint = `https://zenquotes.io/api/quotes/${encodeURIComponent(author)}`;
 
   try {
-    const response = await fetch(endpoint);
-    if (!response.ok)
-      return `Error fetching quotes by ${author}: ${response.statusText}`;
-
+    const response = await fetchWithCorsProxy(endpoint);
     const data = await response.json();
-    if (data.length === 0)
-      return `No quotes found for ${author}.`;
+    
+    if (data.length === 0) return `No quotes found for ${author}.`;
 
     // Maximum of 15 quotes only. 
     const quotesToReturn = data.slice(0, 15);

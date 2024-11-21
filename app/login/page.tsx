@@ -10,167 +10,7 @@ import { ModeToggle } from "@/components/ui/modetoggle";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { apiCall } from "../../lib/apicall";
-// import { ApiMetaObject, AuthCredentials } from "../../lib/apitypes";
-
-async function storeTokenInIndexedDB(token: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("UserDB", 1);
-
-    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains("tokens")) {
-        db.createObjectStore("tokens", { keyPath: "id" });
-      }
-    };
-
-    request.onsuccess = (event: Event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      const transaction = db.transaction("tokens", "readwrite");
-      const store = transaction.objectStore("tokens");
-
-      // Check if a token already exists
-      const getRequest = store.get("authToken");
-
-      getRequest.onsuccess = () => {
-        if (getRequest.result) {
-          console.debug("Token already exists. Replacing with new token.");
-        } else {
-          console.debug("No token found. Storing new token.");
-        }
-
-        // Replace or insert the token
-        store.put({ id: "authToken", token });
-
-        transaction.oncomplete = () => {
-          console.debug("Token stored successfully in IndexedDB");
-          resolve();
-        };
-
-        transaction.onerror = () => {
-          console.error("Error storing token in IndexedDB");
-          reject(transaction.error);
-        };
-      };
-
-      getRequest.onerror = () => {
-        console.error("Error checking existing token in IndexedDB");
-        reject(getRequest.error);
-      };
-    };
-
-    request.onerror = () => {
-      console.error("Error opening IndexedDB");
-      reject(request.error);
-    };
-  });
-}
-
-function getTokenFromIndexedDB(): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
-
-    request.onupgradeneeded = (event: Event) => {
-      const db = event.target.result;
-      // Create an object store for tokens if it doesn't already exist
-      if (!db.objectStoreNames.contains("tokens")) {
-        db.createObjectStore("tokens", { keyPath: "id" }); // You can use a custom keyPath or just an auto-incremented ID
-      }
-    };
-
-    request.onsuccess = (event: Event) => {
-      const db = event.target.result;
-      const transaction = db.transaction(["tokens"], "readonly");
-      const store = transaction.objectStore("tokens");
-
-      const tokenRequest = store.get("authToken"); // Assuming the token is stored under 'authToken'
-
-      tokenRequest.onsuccess = () => {
-        resolve(tokenRequest.result ? tokenRequest.result.token : null);
-      };
-
-      tokenRequest.onerror = () => {
-        reject("Error retrieving token from IndexedDB");
-      };
-    };
-
-    request.onerror = () => {
-      reject("Error opening IndexedDB");
-    };
-  });
-}
-
-// async function apiCall(method: string, meta: ApiMetaObject): any {
-//   // TODO: change the return type
-//   const response = await fetch("/api", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify({
-//       meta: JSON.stringify({
-//         credentials: meta.credentials,
-//         token: meta.token,
-//       }),
-//       method: method,
-//     }),
-//   });
-//   const result = await response.json();
-//   if (result.refresh) {
-//     const newResponse = await fetch("/api", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         meta: JSON.stringify({
-//           credentials: meta.credentials,
-//           token: meta.token,
-//         }),
-//         method: "refresh",
-//       }),
-//     });
-//     const newResult = await newResponse.json();
-//     await storeTokenInIndexedDB(newResult.token);
-//     return newResult;
-//   }
-//   return result;
-// }
-
-async function validateUserToken(
-  toast: (a: {
-    title: string;
-    description: string;
-    variant: "destructive" | "default" | null | undefined;
-  }) => { id: string },
-  router: AppRouterInstance,
-): Promise<void> {
-  //shows login toast
-  try {
-    // Step 1: Retrieve token from IndexedDB
-    const token = await getTokenFromIndexedDB();
-    console.debug("Retrieved token:", token);
-    if (!token) {
-      return;
-    }
-
-    const result = await apiCall("verify", { token: token });
-
-    // TODO: CHECK LOGIC HERE....
-
-    if (!result.error) {
-      toast({
-        title: "Logged in successfully!",
-        description: "Your session was saved.",
-      });
-      router.push("/main");
-    } else {
-      return;
-    }
-  } catch (err) {
-    console.log(err);
-    return;
-  }
-}
+import { storedTokenValidation, storeTokenInIndexedDB } from "@/lib/tokenutils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -179,7 +19,7 @@ export default function LoginPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    validateUserToken(toast, router);
+    storedTokenValidation(toast, router);
   }, []);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -222,7 +62,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-6">
       <div className="absolute top-4 right-4">
-        <ModeToggle className="space-x-4 space-y-6" />
+        <ModeToggle/>
       </div>
       <header className="flex flex-col items-center space-y-2 mb-8">
         <div className="bg-black text-white p-2 rounded">

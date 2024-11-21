@@ -1,5 +1,5 @@
 # High priority tasks
-
+-	[ ] Logout Functionality (delete tokens on both client and server)
 -   [ ] Fix refresh policy
 -   [ ] Fix validation
 -   [ ] Remove code duplication
