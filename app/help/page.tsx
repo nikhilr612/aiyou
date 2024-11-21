@@ -57,7 +57,7 @@ const HelpPage: React.FC = () => {
           experience with Aiyou.
         </p>
         <div className="flex justify-center space-x-4">
-          <Link href="/register">
+          <Link href="/signup">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               Register
             </Button>
