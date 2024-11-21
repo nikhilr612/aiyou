@@ -138,12 +138,6 @@ async function validateUserToken(
     const token = await getTokenFromIndexedDB();
     console.debug("Retrieved token:", token);
     if (!token) {
-      toast({
-        title: "Error",
-        description: "No token found. Please log in again.",
-        variant: "destructive",
-      });
-      router.push("/fcku");
       return;
     }
 
