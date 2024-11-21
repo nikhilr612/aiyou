@@ -134,6 +134,9 @@ export default function HomePage() {
         </p>
         <div className="flex space-x-3">
           {/* Footer Links */}
+          <Link href="/help" className="underline">
+            help
+          </Link>
           <Link href="/terms" className="underline">
             Terms of Service
           </Link>
