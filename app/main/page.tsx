@@ -77,7 +77,123 @@ const initialEndpoints: Endpoint[] = [
   { name: "ollama-local", target: "http://localhost:11434" },
 ];
 
-async function getTokenFromIndexedDB(): Promise<string | null> {
+async function storeInIndexedDB(key: string, value: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const dbName = "ThreadDB";
+    const storeName = "KeyValueStore";
+
+    // Open a connection to the database
+    const request = indexedDB.open(dbName, 1);
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+
+      // Create object store if it doesn't exist
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.close();
+        reject(new Error(`Object store "${storeName}" not found.`));
+        return;
+      }
+
+      // Open a transaction and get the object store
+      const transaction = db.transaction(storeName, "readwrite");
+      const store = transaction.objectStore(storeName);
+
+      // Add the key-value pair to the store
+      const addRequest = store.put({ id: key, value });
+
+      addRequest.onsuccess = () => {
+        resolve();
+      };
+
+      addRequest.onerror = (err) => {
+        reject(
+          new Error(
+            "Error storing the key-value pair: " +
+              (err.target as IDBRequest).error,
+          ),
+        );
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    };
+
+    request.onerror = (err) => {
+      reject(
+        new Error(
+          "Error opening the database: " + (err.target as IDBRequest).error,
+        ),
+      );
+    };
+  });
+}
+
+function getFromIndexedDB(key: string): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const dbName = "ThreadDB";
+    const storeName = "KeyValueStore";
+
+    // Open a connection to the database
+    const request = indexedDB.open(dbName, 1);
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+
+      // Create object store if it doesn't exist
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+
+      // Open a transaction and get the object store
+      const transaction = db.transaction(storeName, "readonly");
+      const store = transaction.objectStore(storeName);
+
+      // Get the value for the given key
+      const getRequest = store.get(key);
+
+      getRequest.onsuccess = () => {
+        // Resolve the value, or null if not found
+        resolve(getRequest.result || null);
+      };
+
+      getRequest.onerror = (err) => {
+        reject(
+          new Error(
+            "Error retrieving the value: " + (err.target as IDBRequest).error,
+          ),
+        );
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    };
+
+    request.onerror = (err) => {
+      reject(
+        new Error(
+          "Error opening the database: " + (err.target as IDBRequest).error,
+        ),
+      );
+    };
+  });
+}
+
+function getTokenFromIndexedDB(): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("UserDB", 1); // Replace with your actual database name
 
@@ -348,7 +464,6 @@ export default function MainPage() {
       });
     }
   };
-
   const handleNewThread = () => {
     if (search.trim()) {
       const newThread = { id: threads.length + 1, name: search };
@@ -385,6 +500,7 @@ export default function MainPage() {
           selectedEndpoint={selectedEndpoint}
           setSelectedEndpoint={setSelectedEndpoint}
           addEndpoint={addEndpoint}
+          router={router}
         />
         <ChatPanel messages={messages[currentThread.id] || []} />
         <InputArea onSendMessage={handleSendMessage} />
@@ -511,6 +627,40 @@ interface NewEndpointDialogProps {
   addEndpoint: (endpoint: Endpoint) => void;
 }
 
+function LogoutButton(router: AppRouterInstance) {
+  function handleLogout(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.deleteDatabase("UserDB");
+      console.log(router);
+      request.onsuccess = () => {
+        console.log("IndexedDB successfully deleted");
+        router.router.push("/login");
+        resolve();
+      };
+
+      request.onerror = (event) => {
+        console.error("Error deleting IndexedDB:", event);
+        reject(new Error("Error deleting IndexedDB"));
+      };
+
+      request.onblocked = () => {
+        console.warn(
+          "IndexedDB deletion blocked. Close all other tabs using this database.",
+        );
+      };
+    });
+  }
+  return (
+    <Button
+      variant="ghost"
+      className="justify-start px-2 w-full"
+      onClick={handleLogout}
+    >
+      logout
+    </Button>
+  );
+}
+
 function NewEndpointDialog({ addEndpoint }: NewEndpointDialogProps) {
   const [newEndpointName, setNewEndpointName] = useState("");
   const [newEndpointUrl, setNewEndpointUrl] = useState("");
@@ -566,6 +716,7 @@ interface TopBarProps {
   selectedEndpoint: Endpoint;
   setSelectedEndpoint: (endpoint: Endpoint) => void;
   addEndpoint: (endpoint: Endpoint) => void;
+  router: AppRouterInstance;
 }
 
 const USER_RAG_CHUNK_SIZE = 512;
@@ -654,6 +805,7 @@ function TopBar({
   selectedEndpoint,
   setSelectedEndpoint,
   addEndpoint,
+  router,
 }: TopBarProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
@@ -680,6 +832,9 @@ function TopBar({
             <IngestItem />
             <DropdownMenuItem>
               <Link href="/help">Help</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="p-0 w-full">
+              <LogoutButton router={router} />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,3 +1,5 @@
+//this the pricay page
+
 "use client";
 
 import Image from "next/image";
@@ -30,23 +32,28 @@ const PrivacyPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen h-screen overflow-y-auto scroll-smooth flex flex-col items-center justify-between p-6 space-y-6 bg-gray-50">
+    <div className="min-h-screen h-screen overflow-y-auto scroll-smooth flex flex-col items-center justify-between p-6 space-y-6 ">
       {/* Header */}
-      <header className="w-full max-w-7xl bg-white flex items-center justify-between space-x-6 py-4 px-6 shadow-md">
+      <header className="w-full max-w-7xl  flex items-center justify-between space-x-6 py-4 ">
         <div className="flex items-center space-x-4">
-          <div className="bg-black text-white p-1 rounded">
-            <Image src="/images/logo.png" alt="Aiyou Logo" width={40} height={40} />
+          <div className="p-1 rounded">
+            <Image
+              src="/images/logo.png"
+              alt="Aiyou Logo"
+              width={40}
+              height={40}
+            />
           </div>
           <h1 className="text-2xl font-semibold">Aiyou Privacy Policy</h1>
         </div>
-        <div className="flex items-center space-x-4">
-          <Link href="/" className="text-gray-700 hover:text-blue-500 transition duration-200">
+        <div className="flex items-center space-x-4 sticky top-0 z-10">
+          {/* <Link href="/" className="text-gray-700 hover:text-blue-500 transition duration-200">
             Home
-          </Link>
+          </Link> */}
           <Button
             variant="default"
             onClick={handleBackToHome}
-            className="flex items-center space-x-2 hover:bg-blue-500 hover:text-white transition duration-200"
+            className="flex items-center space-x-2 "
           >
             <span>Back to Home</span>
           </Button>
@@ -54,117 +61,149 @@ const PrivacyPage: React.FC = () => {
         </div>
       </header>
 
-      <hr className="w-full max-w-7xl border-gray-300" />
+      <hr className="w-full max-w-7xl" />
 
       {/* Privacy Policy Content */}
       <main className="flex flex-col w-full max-w-7xl space-y-6">
-        <Card className="p-6 space-y-4 shadow-lg bg-white rounded-lg transition transform hover:scale-105 hover:shadow-xl">
+        <Card className="p-6 space-y-4 shadow-lg rounded-lg border border-gray-300  transition-transform duration-300 hover:scale-105">
           <CardHeader>
             <CardTitle className="text-2xl">Privacy Policy</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Last updated: [Insert Date]</p>
+          <CardContent className="border-t border-gray-300 pt-3">
+            <p className="">Last updated: [Insert Date]</p>
 
-            <h2 className="text-xl font-semibold mt-4">1. Introduction</h2>
-            <p className="text-gray-700">
-              Welcome to Aiyou. This Privacy Policy explains how we collect, use, and protect your personal information
-              when you use our services. By accessing or using Aiyou, you agree to the collection and use of your
-              information in accordance with this policy.
+            <h2 className="text-xl font-semibold">1. Introduction</h2>
+            <p>
+              Welcome to Aiyou. This Privacy Policy explains how we collect,
+              use, and protect your personal information when you use our
+              services. By accessing or using Aiyou, you agree to the collection
+              and use of your information in accordance with this policy.
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">2. Information We Collect</h2>
-            <p className="text-gray-700">
-              We collect several types of information for various purposes to provide and improve our service to you:
+            <h2 className="text-xl font-semibold">2. Information We Collect</h2>
+            <p>
+              We collect several types of information for various purposes to
+              provide and improve our service to you:
             </p>
-            <ul className="list-disc ml-6 space-y-2 text-gray-700">
+            <ul className="list-disc ml-6 space-y-2 ">
               <li>
-                <strong>Personal Data:</strong> While using our service, we may ask you to provide certain personally
-                identifiable information, such as your name, email address, phone number, etc.
+                <strong>Personal Data:</strong> While using our service, we may
+                ask you to provide certain personally identifiable information,
+                such as your name, email address, phone number, etc.
               </li>
               <li>
-                <strong>Usage Data:</strong> We may also collect information on how the service is accessed and used,
-                including your IP address, browser type, device information, and usage data.
+                <strong>Usage Data:</strong> We may also collect information on
+                how the service is accessed and used, including your IP address,
+                browser type, device information, and usage data.
               </li>
               <li>
-                <strong>Cookies:</strong> We use cookies and similar tracking technologies to monitor activity on our
-                service and retain certain information.
+                <strong>Cookies:</strong> We use cookies and similar tracking
+                technologies to monitor activity on our service and retain
+                certain information.
               </li>
             </ul>
 
-            <h2 className="text-xl font-semibold mt-4">3. How We Use Your Information</h2>
-            <p className="text-gray-700">
-              We use the collected data for various purposes, including:
-            </p>
-            <ul className="list-disc ml-6 space-y-2 text-gray-700">
+            <h2 className="text-xl font-semibold">
+              3. How We Use Your Information
+            </h2>
+            <p>We use the collected data for various purposes, including:</p>
+            <ul className="list-disc ml-6 space-y-2 ">
               <li>To provide, operate, and maintain our service</li>
               <li>To notify you about changes to our service</li>
-              <li>To allow you to participate in interactive features of our service when you choose to do so</li>
+              <li>
+                To allow you to participate in interactive features of our
+                service when you choose to do so
+              </li>
               <li>To provide customer support</li>
-              <li>To gather analysis or valuable information to improve our service</li>
+              <li>
+                To gather analysis or valuable information to improve our
+                service
+              </li>
               <li>To monitor the usage of our service</li>
               <li>To detect, prevent, and address technical issues</li>
             </ul>
 
-            <h2 className="text-xl font-semibold mt-4">4. Data Sharing</h2>
-            <p className="text-gray-700">
-              We do not sell, rent, or trade your personal data. We may share your information in the following
-              circumstances:
+            <h2 className="text-xl font-semibold">4. Data Sharing</h2>
+            <p>
+              We do not sell, rent, or trade your personal data. We may share
+              your information in the following circumstances:
             </p>
-            <ul className="list-disc ml-6 space-y-2 text-gray-700">
+            <ul className="list-disc ml-6 space-y-2 ">
               <li>
-                <strong>Service Providers:</strong> We may employ third-party companies to facilitate our service or
-                provide services on our behalf.
+                <strong>Service Providers:</strong> We may employ third-party
+                companies to facilitate our service or provide services on our
+                behalf.
               </li>
               <li>
-                <strong>Legal Requirements:</strong> We may disclose your personal data if required by law or in
-                response to valid legal requests by public authorities.
+                <strong>Legal Requirements:</strong> We may disclose your
+                personal data if required by law or in response to valid legal
+                requests by public authorities.
               </li>
               <li>
-                <strong>Business Transfers:</strong> If Aiyou is involved in a merger, acquisition, or asset sale, your
-                personal data may be transferred.
+                <strong>Business Transfers:</strong> If Aiyou is involved in a
+                merger, acquisition, or asset sale, your personal data may be
+                transferred.
               </li>
             </ul>
 
-            <h2 className="text-xl font-semibold mt-4">5. Data Security</h2>
-            <p className="text-gray-700">
-              We take reasonable measures to protect your data from unauthorized access, alteration, disclosure, or
-              destruction. However, please be aware that no method of electronic transmission or storage is 100%
+            <h2 className="text-xl font-semibold">5. Data Security</h2>
+            <p>
+              We take reasonable measures to protect your data from unauthorized
+              access, alteration, disclosure, or destruction. However, please be
+              aware that no method of electronic transmission or storage is 100%
               secure.
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">6. Your Rights</h2>
-            <p className="text-gray-700">
-              You have the right to access, update, or delete your personal information. You can request to exercise
-              these rights by contacting us at [Insert Contact Email].
+            <h2 className="text-xl font-semibold">6. Your Rights</h2>
+            <p>
+              You have the right to access, update, or delete your personal
+              information. You can request to exercise these rights by
+              contacting us at [Insert Contact Email].
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">7. Cookies</h2>
-            <p className="text-gray-700">
-              We use cookies to track activity on our service and hold certain information. You can instruct your
-              browser to refuse all cookies or indicate when a cookie is being sent. However, if you do not accept
-              cookies, you may not be able to use some portions of our service.
+            <h2 className="text-xl font-semibold">7. Cookies</h2>
+            <p>
+              We use cookies to track activity on our service and hold certain
+              information. You can instruct your browser to refuse all cookies
+              or indicate when a cookie is being sent. However, if you do not
+              accept cookies, you may not be able to use some portions of our
+              service.
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">8. Links to Other Websites</h2>
-            <p className="text-gray-700">
-              Our service may contain links to other websites that are not operated by us. We are not responsible for
-              the content, privacy policies, or practices of third-party sites. We recommend that you review the privacy
-              policy of every site you visit.
+            <h2 className="text-xl font-semibold">
+              8. Links to Other Websites
+            </h2>
+            <p>
+              Our service may contain links to other websites that are not
+              operated by us. We are not responsible for the content, privacy
+              policies, or practices of third-party sites. We recommend that you
+              review the privacy policy of every site you visit.
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">9. Changes to This Privacy Policy</h2>
-            <p className="text-gray-700">
-              We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new
-              Privacy Policy on this page, and we will update the "Last updated" date at the top of this policy.
+            <h2 className="text-xl font-semibold">
+              9. Changes to This Privacy Policy
+            </h2>
+            <p>
+              We may update this Privacy Policy from time to time. We will
+              notify you of any changes by posting the new Privacy Policy on
+              this page, and we will update the "Last updated" date at the top
+              of this policy.
             </p>
 
-            <h2 className="text-xl font-semibold mt-4">10. Contact Us</h2>
-            <p className="text-gray-700">
-              If you have any questions about this Privacy Policy, please contact us at:
+            <h2 className="text-xl font-semibold">10. Contact Us</h2>
+            <p>
+              If you have any questions about this Privacy Policy, please
+              contact us at:
             </p>
-            <ul className="list-disc ml-6 space-y-2 text-gray-700">
+            <ul className="list-disc ml-6 space-y-2">
               <li>
-                Email: <a href="mailto:support@aiyou.com" className="underline text-blue-500">support@aiyou.com</a>
+                Email:{" "}
+                <a
+                  href="mailto:support@aiyou.com"
+                  className="underline text-blue-500"
+                >
+                  support@aiyou.com
+                </a>
               </li>
             </ul>
           </CardContent>
@@ -180,13 +219,22 @@ const PrivacyPage: React.FC = () => {
           Contact: openinbox@mailinator.com
         </p>
         <div className="flex space-x-4">
-          <Link href="/help" className="underline hover:text-blue-500 transition duration-200">
+          <Link
+            href="/help"
+            className="underline hover:text-blue-500 transition duration-200"
+          >
             Help
           </Link>
-          <Link href="/terms_and_condition" className="underline hover:text-blue-500 transition duration-200">
+          <Link
+            href="/terms_and_condition"
+            className="underline hover:text-blue-500 transition duration-200"
+          >
             Terms of Service
           </Link>
-          <Link href="https://github.com" className="underline hover:text-blue-500 transition duration-200">
+          <Link
+            href="https://github.com"
+            className="underline hover:text-blue-500 transition duration-200"
+          >
             Github
           </Link>
         </div>
