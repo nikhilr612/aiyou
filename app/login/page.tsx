@@ -8,18 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ModeToggle } from "@/components/ui/modetoggle";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef, useEffect } from "react";
-
-interface AuthCredentials {
-  email: string;
-  password: string;
-}
-
-interface ApiMetaObject {
-  credentials?: AuthCredentials;
-  token?: string;
-  chunk_source?: string;
-}
+import { useState, useEffect } from "react";
+import { apiCall } from "../../lib/apicall";
+// import { ApiMetaObject, AuthCredentials } from "../../lib/apitypes";
 
 async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -108,45 +99,49 @@ function getTokenFromIndexedDB(): Promise<string | null> {
   });
 }
 
-async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
-  // TODO: change the return type
-  const response = await fetch("/api", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      meta: JSON.stringify({
-        credentials: meta.credentials,
-        token: meta.token,
-      }),
-      method: method,
-    }),
-  });
-  const result = await response.json();
-  if (result.refresh) {
-    const newResponse = await fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        meta: JSON.stringify({
-          credentials: meta.credentials,
-          token: meta.token,
-        }),
-        method: "refresh",
-      }),
-    });
-    const newResult = await newResponse.json();
-    await storeTokenInIndexedDB(newResult.token);
-    return newResult;
-  }
-  return result;
-}
+// async function apiCall(method: string, meta: ApiMetaObject): any {
+//   // TODO: change the return type
+//   const response = await fetch("/api", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       meta: JSON.stringify({
+//         credentials: meta.credentials,
+//         token: meta.token,
+//       }),
+//       method: method,
+//     }),
+//   });
+//   const result = await response.json();
+//   if (result.refresh) {
+//     const newResponse = await fetch("/api", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         meta: JSON.stringify({
+//           credentials: meta.credentials,
+//           token: meta.token,
+//         }),
+//         method: "refresh",
+//       }),
+//     });
+//     const newResult = await newResponse.json();
+//     await storeTokenInIndexedDB(newResult.token);
+//     return newResult;
+//   }
+//   return result;
+// }
 
 async function validateUserToken(
-  toast: any,
+  toast: (a: {
+    title: string;
+    description: string;
+    variant: "destructive" | "default" | null | undefined;
+  }) => { id: string },
   router: AppRouterInstance,
 ): Promise<void> {
   //shows login toast
@@ -158,7 +153,7 @@ async function validateUserToken(
       return;
     }
 
-    const result = await sendAPIRequest("verify", { token: token });
+    const result = await apiCall("verify", { token: token });
 
     // TODO: CHECK LOGIC HERE....
 
@@ -172,6 +167,7 @@ async function validateUserToken(
       return;
     }
   } catch (err) {
+    console.log(err);
     return;
   }
 }
@@ -192,7 +188,7 @@ export default function LoginPage() {
 
     try {
       // Send request to the API
-      const result = await sendAPIRequest("authenticateUser", {
+      const result = await apiCall("authenticateUser", {
         credentials: { email: email, password: password },
       });
 

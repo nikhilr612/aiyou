@@ -186,8 +186,8 @@ const PrivacyPage: React.FC = () => {
             <p>
               We may update this Privacy Policy from time to time. We will
               notify you of any changes by posting the new Privacy Policy on
-              this page, and we will update the "Last updated" date at the top
-              of this policy.
+              this page, and we will update the &quot;Last updated&quot; date at
+              the top of this policy.
             </p>
 
             <h2 className="text-xl font-semibold">10. Contact Us</h2>

@@ -8,17 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { ModeToggle } from "@/components/ui/modetoggle";
-
-interface AuthCredentials {
-  email: string;
-  password: string;
-}
-
-interface ApiMetaObject {
-  credentials?: AuthCredentials;
-  token?: string;
-  chunk_source?: string;
-}
+import { apiCall } from "../../lib/apicall";
+//import { ApiMetaObject, AuthCredentials } from "../../lib/apitypes";
 
 async function storeTokenInIndexedDB(token: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -91,43 +82,6 @@ function getTokenFromIndexedDB(): Promise<string | null> {
   });
 }
 
-async function sendAPIRequest(method: string, meta: ApiMetaObject): any {
-  // TODO: change the return type
-  const response = await fetch("/api", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      meta: JSON.stringify({
-        credentials: meta.credentials,
-        token: meta.token,
-      }),
-      method: method,
-    }),
-  });
-  const result = await response.json();
-  if (result.refresh) {
-    const newResponse = await fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        meta: JSON.stringify({
-          credentials: meta.credentials,
-          token: meta.token,
-        }),
-        method: "refresh",
-      }),
-    });
-    const newResult = await newResponse.json();
-    await storeTokenInIndexedDB(newResult.token);
-    return newResult;
-  }
-  return result;
-}
-
 async function validateUserToken(
   toast: any,
   router: AppRouterInstance,
@@ -141,7 +95,7 @@ async function validateUserToken(
       return;
     }
 
-    const result = await sendAPIRequest("verify", { token: token });
+    const result = await apiCall("verify", { token: token });
 
     // TODO: CHECK LOGIC HERE....
 
@@ -184,7 +138,7 @@ export default function SignupPage() {
       });
     } else
       try {
-        const result = await sendAPIRequest("createUser", {
+        const result = await apiCall("createUser", {
           credentials: { email: email, password: password },
         });
         if (result.error) {

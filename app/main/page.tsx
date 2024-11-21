@@ -57,17 +57,6 @@ interface Thread {
   name: string;
 }
 
-interface AuthCredentials {
-  email: string;
-  password: string;
-}
-
-interface ApiMetaObject {
-  credentials?: AuthCredentials;
-  token?: string;
-  chunk_source?: string;
-}
-
 const THREAD_IMAGE_PLACEHOLDER: string = "/images/bot-avatar.png";
 const USER_AVATAR_PLACEHOLDER: string = "/images/user-avatar.png";
 
@@ -75,6 +64,9 @@ const initialEndpoints: Endpoint[] = [
   { name: "ollama-local", target: "http://localhost:11434" },
 ];
 
+// TODO: Replace local storage.
+
+/*
 async function storeInIndexedDB(key: string, value: string): Promise<void> {
   const dbName = "ThreadDB";
   const storeName = "KeyValueStore";
@@ -87,8 +79,14 @@ async function storeInIndexedDB(key: string, value: string): Promise<void> {
         db.createObjectStore(storeName, { keyPath: "id" });
       }
     };
-    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
-    request.onerror = (err) => reject(new Error("Error opening the database: " + (err.target as IDBRequest).error));
+    request.onsuccess = (event) =>
+      resolve((event.target as IDBOpenDBRequest).result);
+    request.onerror = (err) =>
+      reject(
+        new Error(
+          "Error opening the database: " + (err.target as IDBRequest).error,
+        ),
+      );
   });
 
   if (!db.objectStoreNames.contains(storeName)) {
@@ -101,12 +99,19 @@ async function storeInIndexedDB(key: string, value: string): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const addRequest = store.put({ id: key, value });
     addRequest.onsuccess = () => resolve();
-    addRequest.onerror = (err) => reject(new Error("Error storing the key-value pair: " + (err.target as IDBRequest).error));
+    addRequest.onerror = (err) =>
+      reject(
+        new Error(
+          "Error storing the key-value pair: " +
+            (err.target as IDBRequest).error,
+        ),
+      );
   });
 
   transaction.oncomplete = () => db.close();
-}
+}*/
 
+/*
 async function getFromIndexedDB(key: string): Promise<string | null> {
   const dbName = "ThreadDB";
   const storeName = "KeyValueStore";
@@ -119,8 +124,14 @@ async function getFromIndexedDB(key: string): Promise<string | null> {
         db.createObjectStore(storeName, { keyPath: "id" });
       }
     };
-    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
-    request.onerror = (err) => reject(new Error("Error opening the database: " + (err.target as IDBRequest).error));
+    request.onsuccess = (event) =>
+      resolve((event.target as IDBOpenDBRequest).result);
+    request.onerror = (err) =>
+      reject(
+        new Error(
+          "Error opening the database: " + (err.target as IDBRequest).error,
+        ),
+      );
   });
 
   const transaction = db.transaction(storeName, "readonly");
@@ -128,13 +139,18 @@ async function getFromIndexedDB(key: string): Promise<string | null> {
   const result = await new Promise<any>((resolve, reject) => {
     const getRequest = store.get(key);
     getRequest.onsuccess = () => resolve(getRequest.result || null);
-    getRequest.onerror = (err) => reject(new Error("Error retrieving the value: " + (err.target as IDBRequest).error));
+    getRequest.onerror = (err) =>
+      reject(
+        new Error(
+          "Error retrieving the value: " + (err.target as IDBRequest).error,
+        ),
+      );
   });
 
   transaction.oncomplete = () => db.close();
 
   return result;
-}
+}*/
 
 function getTokenFromIndexedDB(): Promise<string | null> {
   return new Promise((resolve, reject) => {
@@ -223,36 +239,13 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
   });
 }
 
-/**
- * Convenience function to make an API call with the specified API `method` and `meta` object.
- * */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function apiCall(method: string, meta: ApiMetaObject, params?: { text: string }): Promise<any> {
-  // TODO: change the return type
-  const response = await fetch("/api", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      meta: JSON.stringify({
-        credentials: meta.credentials,
-        token: meta.token,
-        chunk_source: meta.chunk_source,
-      }),
-      method: method,
-      ...params
-    }),
-  });
-  const result = await response.json();
-  if (result.refreshed_token) await storeTokenInIndexedDB(result.refreshed_token);
-  return result;
-}
-/* eslint-enable @typescript-eslint/no-explicit-any */
-
 // TODO: Add correct type here.
 async function validateUserToken(
-  toast: (a: {title: string; description: string; variant: "destructive" | "default" | null | undefined }) => {id: string },
+  toast: (a: {
+    title: string;
+    description: string;
+    variant: "destructive" | "default" | null | undefined;
+  }) => { id: string },
   router: AppRouterInstance,
 ): Promise<string | undefined> {
   //shows login toast
@@ -545,7 +538,7 @@ function EndpointSelect({
                   />
                 </CommandItem>
               ))}
-              <NewEndpointDialog addEndpoint={addEndpoint}/>
+              <NewEndpointDialog addEndpoint={addEndpoint} />
             </CommandGroup>
           </CommandList>
         </Command>
@@ -563,7 +556,7 @@ interface LogoutButtonProps {
   router: AppRouterInstance;
 }
 
-function LogoutButton({ router } : LogoutButtonProps) {
+function LogoutButton({ router }: LogoutButtonProps) {
   function handleLogout(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.deleteDatabase("UserDB");
@@ -676,14 +669,15 @@ function IngestItem() {
           TEXT_DELIMS,
         );
         // TODO: Check this
-        const promises = chunks.map(
-          async (chunk) =>
-            apiCall("ingest", {
-                token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
-                chunk_source: file.name,
-              },
-              { text: chunk }
-            )
+        const promises = chunks.map(async (chunk) =>
+          apiCall(
+            "ingest",
+            {
+              token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
+              chunk_source: file.name,
+            },
+            { text: chunk },
+          ),
         );
         const results = await Promise.all(promises);
         console.debug(results);
@@ -857,7 +851,7 @@ interface CodeBlockProps {
   language: string;
 }
 
-export function CodeBlock({ code, language }: CodeBlockProps) {
+function CodeBlock({ code, language }: CodeBlockProps) {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
   };
@@ -887,7 +881,7 @@ interface MarkdownRendererProps {
   content: string;
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <Markdown
       className="display-block"
@@ -897,7 +891,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           const match = /language-(\w+)/.exec(className || "");
           return match ? (
             <CodeBlock
-              {...rest}
               language={match[1]}
               code={String(children).replace(/\n$/, "")}
             />

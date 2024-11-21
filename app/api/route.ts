@@ -1,23 +1,14 @@
 import { vecstore, User } from "../../lib/db";
 import { generateTextEmbedding } from "../../lib/model";
+import { ApiMetaObject, AuthCredentials } from "../../lib/apitypes";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const retriever_limit = 5;
 const ALLOWED_TIME = 1800; //In seconds
 const REFRESH_WINDOW = 300; // 5 mins.
-const SECRET_KEY = process.env.SECRET_KEY;
-
-interface AuthCredentials {
-	email: string;
-	password: string;
-}
-
-interface ApiMetaObject {
-	credentials?: AuthCredentials;
-	token?: string;
-	chunk_source?: string;
-}
+const SECRET_KEY: string =
+	process.env.SECRET_KEY || "qtejofhslBadgjvnxAqtejofhslBadgj";
 
 /// TODO(Low Priority): Store information about the user ingesting data in to vector store.
 /* interface VectorMetaData {
@@ -51,7 +42,8 @@ export async function POST(req: Request) {
 		const permissions = await validateUserToken(meta_object.token);
 
 		let refreshed_token = undefined;
-		if (permissions.auto_refresh) // Refresh the token when possible.
+		if (permissions.auto_refresh)
+			// Refresh the token when possible.
 			refreshed_token = await refreshToken(meta_object.token);
 
 		switch (api_method) {
@@ -72,7 +64,10 @@ export async function POST(req: Request) {
 					meta_object.chunk_source || "User uploaded context",
 				);
 				return new Response(
-					JSON.stringify({ error: false, refreshed_token: refreshed_token }),
+					JSON.stringify({
+						error: false,
+						refreshed_token: refreshed_token,
+					}),
 				);
 
 			case "retrieve":
@@ -110,9 +105,7 @@ export async function POST(req: Request) {
 				// Here 'meta' is the cause for request to re-create vector search index.
 				// Reject is user is 'anon'.
 				await createVectorSearchIndex();
-				return new Response(
-					JSON.stringify({ error: false }),
-				);
+				return new Response(JSON.stringify({ error: false }));
 
 			case "createUser":
 				if (!permissions.allow_create)
@@ -130,12 +123,15 @@ export async function POST(req: Request) {
 					return new Response(
 						JSON.stringify({
 							error: true,
-							message: "Invalid user creation request. Missing credientials.",
+							message:
+								"Invalid user creation request. Missing credientials.",
 						}),
 						{ status: 400 },
 					);
 				const new_token = await createUser(meta_object.credentials);
-				return new Response(JSON.stringify({ error: false, token: new_token }));
+				return new Response(
+					JSON.stringify({ error: false, token: new_token }),
+				);
 
 			case "authenticateUser":
 				/// Authenticate user. Always available.
@@ -144,12 +140,15 @@ export async function POST(req: Request) {
 					return new Response(
 						JSON.stringify({
 							error: true,
-							message: "Invalid authentication request. Missing credentials.",
+							message:
+								"Invalid authentication request. Missing credentials.",
 						}),
 						{ status: 400 },
 					);
 				const token = await authenticateUser(meta_object.credentials);
-				return new Response(JSON.stringify({ error: false, token: token }));
+				return new Response(
+					JSON.stringify({ error: false, token: token }),
+				);
 
 			case "verify":
 				/// Verify that the token has user permissions.
@@ -164,7 +163,10 @@ export async function POST(req: Request) {
 						{ status: 449 },
 					);
 				return new Response(
-					JSON.stringify({ error: false, refreshed_token: refreshed_token }),
+					JSON.stringify({
+						error: false,
+						refreshed_token: refreshed_token,
+					}),
 				);
 
 			case "refresh":
@@ -186,7 +188,10 @@ export async function POST(req: Request) {
 
 			default:
 				return new Response(
-					JSON.stringify({ error: true, message: "Invalid API method" }),
+					JSON.stringify({
+						error: true,
+						message: "Invalid API method",
+					}),
 					{ status: 400 },
 				);
 		}
@@ -242,7 +247,9 @@ async function insertTextIntoStore(
 ) {
 	const embeddings = await generateTextEmbedding(text);
 	const meta = meta_json ? meta_json : JSON.stringify(meta_object || {});
-	await vecstore.add([{ vector: embeddings.tolist(), text: text, meta: meta }]);
+	await vecstore.add([
+		{ vector: embeddings.tolist(), text: text, meta: meta },
+	]);
 }
 
 /**
@@ -340,9 +347,9 @@ const DEV_PERMISSIONS: ApiPermissions = {
  * Outlines the server policy of determining if a token is allowed to refresh.
  * Liable to change.
  * */
-function refreshPolicy(expiry: number, currentTime: number) : boolean {
-	if (currentTime > expiry + REFRESH_WINDOW) return false;
-	else if (currentTime > expiry) return true;
+function refreshPolicy(expiry: number, currentTime: number): boolean {
+	if (currentTime > expiry) return false;
+	else if (currentTime > expiry - REFRESH_WINDOW) return true;
 	else return false;
 }
 
@@ -353,7 +360,10 @@ function refreshPolicy(expiry: number, currentTime: number) : boolean {
 async function validateUserToken(token: string): Promise<ApiPermissions> {
 	if (token == NULL_TOKEN) return NULL_PERMISSIONS;
 
-	const meta_object = jwt.verify(token, process.env.SECRET_KEY);
+	const meta_object: { email: string; exp: number } = jwt.verify(
+		token,
+		SECRET_KEY,
+	);
 
 	if (
 		process.env.ALLOW_DEV_AUTH &&
@@ -362,7 +372,8 @@ async function validateUserToken(token: string): Promise<ApiPermissions> {
 		return DEV_PERMISSIONS;
 	}
 
-	if (!meta_object || !meta_object.exp) throw new Error("Invalid USER token.");
+	if (!meta_object || !meta_object.exp)
+		throw new Error("Invalid USER token.");
 
 	const existingUser = await User.findOne({ token: token });
 	console.debug("token:" + token);
@@ -394,7 +405,7 @@ async function refreshToken(token: string): Promise<string> {
 
 	existingUser.token = new_token;
 	await existingUser.save();
-	
+
 	console.debug("Token change:", existingUser, "new:", new_token);
 	return new_token;
 }
