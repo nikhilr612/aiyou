@@ -76,119 +76,64 @@ const initialEndpoints: Endpoint[] = [
 ];
 
 async function storeInIndexedDB(key: string, value: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const dbName = "ThreadDB";
-    const storeName = "KeyValueStore";
+  const dbName = "ThreadDB";
+  const storeName = "KeyValueStore";
 
-    // Open a connection to the database
+  const db = await new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
-
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-
-      // Create object store if it doesn't exist
       if (!db.objectStoreNames.contains(storeName)) {
         db.createObjectStore(storeName, { keyPath: "id" });
       }
     };
-
-    request.onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      if (!db.objectStoreNames.contains(storeName)) {
-        db.close();
-        reject(new Error(`Object store "${storeName}" not found.`));
-        return;
-      }
-
-      // Open a transaction and get the object store
-      const transaction = db.transaction(storeName, "readwrite");
-      const store = transaction.objectStore(storeName);
-
-      // Add the key-value pair to the store
-      const addRequest = store.put({ id: key, value });
-
-      addRequest.onsuccess = () => {
-        resolve();
-      };
-
-      addRequest.onerror = (err) => {
-        reject(
-          new Error(
-            "Error storing the key-value pair: " +
-              (err.target as IDBRequest).error,
-          ),
-        );
-      };
-
-      transaction.oncomplete = () => {
-        db.close();
-      };
-    };
-
-    request.onerror = (err) => {
-      reject(
-        new Error(
-          "Error opening the database: " + (err.target as IDBRequest).error,
-        ),
-      );
-    };
+    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
+    request.onerror = (err) => reject(new Error("Error opening the database: " + (err.target as IDBRequest).error));
   });
+
+  if (!db.objectStoreNames.contains(storeName)) {
+    db.close();
+    throw new Error(`Object store "${storeName}" not found.`);
+  }
+
+  const transaction = db.transaction(storeName, "readwrite");
+  const store = transaction.objectStore(storeName);
+  await new Promise<void>((resolve, reject) => {
+    const addRequest = store.put({ id: key, value });
+    addRequest.onsuccess = () => resolve();
+    addRequest.onerror = (err) => reject(new Error("Error storing the key-value pair: " + (err.target as IDBRequest).error));
+  });
+
+  transaction.oncomplete = () => db.close();
 }
 
-function getFromIndexedDB(key: string): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    const dbName = "ThreadDB";
-    const storeName = "KeyValueStore";
+async function getFromIndexedDB(key: string): Promise<string | null> {
+  const dbName = "ThreadDB";
+  const storeName = "KeyValueStore";
 
-    // Open a connection to the database
+  const db = await new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
-
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-
-      // Create object store if it doesn't exist
       if (!db.objectStoreNames.contains(storeName)) {
         db.createObjectStore(storeName, { keyPath: "id" });
       }
     };
-
-    request.onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      // Open a transaction and get the object store
-      const transaction = db.transaction(storeName, "readonly");
-      const store = transaction.objectStore(storeName);
-
-      // Get the value for the given key
-      const getRequest = store.get(key);
-
-      getRequest.onsuccess = () => {
-        // Resolve the value, or null if not found
-        resolve(getRequest.result || null);
-      };
-
-      getRequest.onerror = (err) => {
-        reject(
-          new Error(
-            "Error retrieving the value: " + (err.target as IDBRequest).error,
-          ),
-        );
-      };
-
-      transaction.oncomplete = () => {
-        db.close();
-      };
-    };
-
-    request.onerror = (err) => {
-      reject(
-        new Error(
-          "Error opening the database: " + (err.target as IDBRequest).error,
-        ),
-      );
-    };
+    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
+    request.onerror = (err) => reject(new Error("Error opening the database: " + (err.target as IDBRequest).error));
   });
+
+  const transaction = db.transaction(storeName, "readonly");
+  const store = transaction.objectStore(storeName);
+  const result = await new Promise<any>((resolve, reject) => {
+    const getRequest = store.get(key);
+    getRequest.onsuccess = () => resolve(getRequest.result || null);
+    getRequest.onerror = (err) => reject(new Error("Error retrieving the value: " + (err.target as IDBRequest).error));
+  });
+
+  transaction.oncomplete = () => db.close();
+
+  return result;
 }
 
 function getTokenFromIndexedDB(): Promise<string | null> {
@@ -282,7 +227,7 @@ async function storeTokenInIndexedDB(token: string): Promise<void> {
  * Convenience function to make an API call with the specified API `method` and `meta` object.
  * */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-async function sendAPIRequest(method: string, meta: ApiMetaObject): Promise<any> {
+async function apiCall(method: string, meta: ApiMetaObject, params?: { text: string }): Promise<any> {
   // TODO: change the return type
   const response = await fetch("/api", {
     method: "POST",
@@ -296,6 +241,7 @@ async function sendAPIRequest(method: string, meta: ApiMetaObject): Promise<any>
         chunk_source: meta.chunk_source,
       }),
       method: method,
+      ...params
     }),
   });
   const result = await response.json();
@@ -324,7 +270,7 @@ async function validateUserToken(
       return undefined;
     }
 
-    const result = await sendAPIRequest("verify", { token: token });
+    const result = await apiCall("verify", { token: token });
 
     // TODO: CHECK LOGIC HERE....
 
@@ -599,7 +545,7 @@ function EndpointSelect({
                   />
                 </CommandItem>
               ))}
-              <NewEndpointDialog addEndpoint={addEndpoint} />
+              <NewEndpointDialog addEndpoint={addEndpoint}/>
             </CommandGroup>
           </CommandList>
         </Command>
@@ -610,16 +556,21 @@ function EndpointSelect({
 
 interface NewEndpointDialogProps {
   addEndpoint: (endpoint: Endpoint) => void;
+  className?: string; // Pass down
 }
 
-function LogoutButton(router: AppRouterInstance) {
+interface LogoutButtonProps {
+  router: AppRouterInstance;
+}
+
+function LogoutButton({ router } : LogoutButtonProps) {
   function handleLogout(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.deleteDatabase("UserDB");
       console.log(router);
       request.onsuccess = () => {
         console.log("IndexedDB successfully deleted");
-        router.router.push("/login");
+        router.push("/login");
         resolve();
       };
 
@@ -726,23 +677,13 @@ function IngestItem() {
         );
         // TODO: Check this
         const promises = chunks.map(
-          /*async (chunk) =>
-            fetch("/api", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                text: chunk,
-                method: "ingest",
-                meta: JSON.stringify({
-                  token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
-                  chunk_source: file.name,
-                }), // TODO: Add JSON for user-related stuff here. For now this is the source. See [route.ts] for more information.
-              }),
-            }).then((r) => r.json()),*/
-          sendAPIRequest("ingest", {
-            token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
-            chunk_source: file.name,
-          }),
+          async (chunk) =>
+            apiCall("ingest", {
+                token: (await getTokenFromIndexedDB()) || "NULL_TOKEN",
+                chunk_source: file.name,
+              },
+              { text: chunk }
+            )
         );
         const results = await Promise.all(promises);
         console.debug(results);
