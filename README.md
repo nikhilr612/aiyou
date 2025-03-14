@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aiyou
 
-## Getting Started
+**Aiyou** is a frontend for **Large Language Models (LLMs)** developed as a **Next.js web application**. It facilitates seamless interaction with LLM APIs, providing a robust platform for AI-powered solutions. The project currently supports **Ollama**, with planned integration for the **OpenAI API** and other LLM services.
 
-First, run the development server:
+## Project Architecture
+- **Frontend**: Handles user interaction and renders responses from LLMs.
+- **Backend**: Manages API calls, RAG workflows, and embeddings generation.
+- **Vector Database**: Powered by **LanceDB** for storing and querying embeddings with exceptional performance.
+- **Model Integration**: Compatible with various LLM APIs, with additional integrations under development.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Corrective RAG
+Aiyou incorporates common **Retrieval-Augmented Generation (RAG)** techniques:
+- **Iterative Refinement**: Implements corrective mechanisms to enhance the accuracy of generated responses.
+- **Tool Calling**: Integrates tools to dynamically retrieve and utilize external context during response generation.
+ 
+## Installation and Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Ensure **Node.js** and a package manager such as **npm**, **yarn**, or **pnpm** are installed on your system.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Steps to Run Locally
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nikhilr612/aiyou
+   cd https://github.com/nikhilr612/aiyou
+   ```
 
-## Learn More
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Access the application in your browser at:
+   **[http://localhost:3000](http://localhost:3000)**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Resources and Documentation
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For more information on the frameworks and tools utilized in Aiyou, refer to the following resources:
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [Huggingface Transformers](https://huggingface.co/transformers/)
+- [LanceDB Documentation](https://lancedb.github.io/)
