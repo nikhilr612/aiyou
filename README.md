@@ -45,4 +45,4 @@ For more information on the frameworks and tools utilized in Aiyou, refer to the
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Documentation](https://reactjs.org/docs/getting-started.html)
 - [Huggingface Transformers](https://huggingface.co/transformers/)
-- [LanceDB Documentation](https://lancedb.github.io/)
+- [LanceDB Documentation](https://docs.lancedb.com/enterprise/introduction)
